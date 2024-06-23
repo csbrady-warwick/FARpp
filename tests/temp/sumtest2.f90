@@ -1,0 +1,31 @@
+PROGRAM main
+  USE ISO_C_BINDING
+  USE ISO_FORTRAN_ENV
+  INTEGER(INT64), PARAMETER :: ITS=200
+  INTEGER(INT64), PARAMETER :: N=30
+  INTEGER(INT64), PARAMETER :: NX=N
+  INTEGER(INT64), PARAMETER :: NY=N
+  INTEGER(INT64), PARAMETER :: NZ=N
+  INTEGER(INT64), PARAMETER :: NA=N
+  INTEGER(INT64), PARAMETER :: NB=N
+  INTEGER(INT64), DIMENSION(:,:,:,:,:), ALLOCATABLE :: A
+  INTEGER(INT64) :: B,i
+  INTEGER :: start, end, count_rate
+  INTEGER(INT64) :: m
+  LOGICAL :: f
+  ALLOCATE(A(NX,NY,NZ,NA,NB))
+  A = 2
+  B = 0
+
+  CALL SYSTEM_CLOCK(start,count_rate)
+  DO i=1,ITS
+    !B= SUM(A*2)
+    m=COUNT((A*2)>1,KIND=INT64)
+    !f=ANY(A<2)
+  END DO
+  CALL SYSTEM_CLOCK(end)
+  PRINT *, "Time for main loop is " , REAL(end-start)/REAL(count_rate) , " seconds"
+  PRINT *, "B = " , B 
+  PRINT *, "m = ", m
+  PRINT *, "f = ", f
+END PROGRAM
