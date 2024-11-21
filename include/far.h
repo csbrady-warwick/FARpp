@@ -15,6 +15,12 @@
 */
 #ifndef FAR_H
 #define FAR_H
+
+//If the compiler does not support __has_include then define it as 0
+#if not defined(__has_include)
+#define __has_include(A) 0
+#endif
+
 #include <array>
 #include <algorithm>
 #include <any>
@@ -100,6 +106,19 @@
 	#endif
 #endif
 
+//Detect if the compiler supports the mdspan header
+//Either the standard header or the Kokkos header (supplied by this library)
+#if __has_include(<mdspan>) || defined(FAR_HAS_MDSPAN)
+#include <mdspan>
+#define FAR_MDSPAN std::mdspan
+#elif __has_include("mdspan.hpp") || defined(FAR_HAS_MDSPAN_HPP)
+#include "mdspan.hpp"
+#define FAR_MDSPAN std::experimental::mdspan
+#endif
+
+#if __cplusplus >= 202300L
+    #define FAR_CPP2023
+#endif
 
 //If on any compiler that supports the __HAS_INT128 macro use it
 //Otherwise leave it unset
@@ -1197,7 +1216,7 @@ namespace far
 	 * @param value The value to assign
 	 */
 	template<int level=0, typename T1, typename T2>
-		inline	void assignTupleLevel(T1& tuple, const int target, const T2 value){
+		inline void assignTupleLevel(T1& tuple, const int target, const T2 value){
 			if (level == target) {
 				std::get<level>(tuple)=value;
 			}
@@ -5556,7 +5575,12 @@ namespace far
 						/**
 						 * Return the raw data, including any slice offset
 						 */
-						valueType *data() const { return this->rdata; }
+						valueType *data() const {
+							if (!contiguous()){
+								throw std::runtime_error("Cannot get data from non-contiguous array");
+							}
+							return this->rdata; 
+							}
 
 						/**
 						 * Return the raw data
@@ -12417,5 +12441,27 @@ namespace far
 							r=src;
 							return r;
 						}
+#if defined(FAR_CPP2023) && defined(FAR_MDSPAN)
+					template<typename T_src>
+						auto make_mdspan(T_src&& src){
+							constexpr int rank = arrayInfo<T_src>::rank;
+							using core_type = typename arrayInfo<T_src>::type;
+							N_ary_tuple_type_t<int64_t,rank> sizes;
+							for (int i=1;i<=rank;++i){
+								assignTupleLevel(sizes,i-1,src.getRankSize(i));
+							}
+							auto call = std::tuple_cat(std::make_tuple(std::ref(std::forward<T_src>(src))),sizes);
+
+							auto b = [](T_src&&src, auto&&... args){
+								if constexpr(arrayInfo<T_src>::order==0){
+									return FAR_MDSPAN<core_type,std::dextents<int64_t,rank>,std::experimental::layout_left>(src.data(), args...);
+								} else {
+									return FAR_MDSPAN<core_type,std::dextents<int64_t,rank>,std::experimental::layout_right>(src.data(), args..., bounds_check_state::bc_default);
+								}
+							};
+							return std::apply(b,call);
+						}
+#endif
+
 			};
 #endif

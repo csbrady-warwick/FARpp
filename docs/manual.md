@@ -1793,7 +1793,7 @@ int main(){
 
 The previous example shows what can be done with pointer remapping. It remaps a rank 3 array to a rank 2 array, with a variety of sizes and bounds. We then remap a contiguous slice of the original array to a rank 2 array and then remap the rank 2 array down to a rank 1 array. The rank 1 array is then remapped back up to a different shaped rank 2 array. Once I have that rank 2 array from all the sequence of remapping I multiply a slice of the elements by -1, showing that this change propagates correctly back to the original data in the original array.
 
-### C++ features
+### C++20 and earlier features
 
 While FAR++ is mainly intended to be used as a self contained "Fortran-Like" library, it does have to interact with C++ code so it does have features that are based on C++. We have already seen simple functions like `for_each`, `generate` and `iota` that are more based in C++ than Fortran, but FAR++ arrays and lazyArrays are also C++ STL containers, implementing forward and backward random access iterators. The iterators for FAR++ arrays simply go through the items in the array in the order in which they are stored. You can use the iterators for any purpose where normal iterators can be used
 
@@ -1911,14 +1911,49 @@ int main(){
 
 To provide a more native C++ feel to FAR++, FAR++ arrays have methods for testing for sizes etc. as well as the Fortran function-based inquiry mechanisms. These methods are
 
-* size_t size() - Get the total number of elements in the array
-* size_t rankSize(int rank) - Get the total number of elements in direction rank, with rank starting from 1
-* int64_t LB(int rank) - Get the lower bound of direction rank, with rank starting from 1
-* int64_t UB(int rank) - Get the upper bound of direction rank, with rank starting from 1
+* size\_t size() - Get the total number of elements in the array
+* size\_t rankSize(int rank) - Get the total number of elements in direction rank, with rank starting from 1
+* int64\_t LB(int rank) - Get the lower bound of direction rank, with rank starting from 1
+* int64\_t UB(int rank) - Get the upper bound of direction rank, with rank starting from 1
 * bool contiguous() - Is this array's data contiguous in memory
 * bool allocated() - Is this array allocated (i.e. has memory associated with it)
 * bool associated() - Is this array a pointer pointing to another array
-* bool associated(T_other &other) - Is this array a pointer pointing to other or the same target as other if other is a pointer
+* bool associated(T\_other &other) - Is this array a pointer pointing to other or the same target as other if other is a pointer
+
+### C++23 features
+
+While FAR++ is a C++20 library we are starting to add C++23 features optionally. If FAR++ is compiled with a C++23 supporting compiler these features will be automatically enabled
+
+#### mdspan conversion
+
+C++23 added the concept of the `std::mdspan`, allowing you to have a multi dimensional view onto a contiguous memory chunk that can be accessed with a comma separated list of indices in the array subscription (square bracket) operator. This is substantially less powerful than FAR++'s array features, but as a built in feature it is useful to have the option to make use of them. At the time of writing `std::mdspan` has not been implemented in any of the compilers that I have tested, but there is a reference implementation as part of the Kokkos project and since the license for Kokkos is compatible with FAR++'s license this reference implementation is shipped with FAR++. If your compiler does have built in support for `std::mdspan` that support will be used in preference to the Kokkos implementation.
+
+Contiguous FAR++ arrays can be converted to `std::mdspan` objects using the `to_mdspan` function. This function takes a FAR++ array as the only parameter and returns an `std::mdspan` oobject that is a view on the same data. Obviously, since the purpose of `std::mdspan` objects is to provide a view on memory you can only use this on actual arrays, not array expressions. 
+
+```cpp
+#include <iostream>
+#include "far.h"
+
+int main(){
+  far::Array<int,2> myArray(3,3);
+  for (int j=1;j<=3;++j){
+    for (int i=1;i<=3;++i){
+      myArray(i,j)=i*j;
+    }
+  }
+  std::cout << "Array from FAR++ is \n";
+  std::cout << far::gridPrint(myArray) << "\n\n";
+
+//std::mdspan is a built in C++23 way of viewing memory as a multidimensional array
+  std::cout << "Array from FAR++ viewed as a std::mdspan is \n";
+  auto b = far::make_mdspan(myArray);
+  for (int j=0;j<b.extent(1);++j)
+    for (int i=0;i<b.extent(0);++i){
+      std::cout << "{" << i << ", " << j << "} =  ";
+      std::cout << b[i,j] << "\n";
+    }
+}
+```
 
 ### Elemental functions
 
