@@ -2017,7 +2017,7 @@ namespace far
 						contiguousIndexBuilder(T sizes)
 						{
 							size = 1;
-							for (int i = defaultLB; i < rank+defaultLB; ++i)
+							for (int i = 0; i < rank; ++i)
 							{
 								stride[i] = 1;
 								lb[i] = defaultLB;
@@ -7648,7 +7648,7 @@ namespace far
 								constexpr int rank = arrayInfo<T_i>::rank;
 								Array<kind,1> result(rank);
 								for (int i=1;i<=rank;++i){
-									result(i) = array.getLB(i);
+									result(i-1+defaultLB) = array.getLB(i);
 								}
 								return result;
 #ifdef RANK1_INQUIRY_IS_VALUE
@@ -10630,7 +10630,7 @@ namespace far
 								constexpr int rank = arrayInfo<T_source>::rank;
 								result.allocate(rank);
 								for (int i=1;i<=rank;++i){
-									result(i)=source.getRankSize(i);
+									result(i-1+defaultLB)=source.getRankSize(i);
 								}
 								return result;
 							}
@@ -11156,7 +11156,7 @@ namespace far
 								constexpr int rank = arrayInfo<T_i>::rank;
 								Array<kind,1> result(rank);
 								for (int i=1;i<=rank;++i){
-									result(i) = array.getUB(i);
+									result(i-1+defaultLB) = array.getUB(i);
 								}
 								return result;
 #ifdef RANK1_INQUIRY_IS_VALUE
