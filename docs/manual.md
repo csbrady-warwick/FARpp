@@ -3236,6 +3236,8 @@ int main() {
 }
 ```
 
+There is a substantial overhead in using this type of runtime catchable error which may not be acceptable for some use cases, and may not be useful to a developer. You can switch to a mode where bounds errors are fatal (mirroring the behaviour in most extant Fortran compilers) which has a much lower overhead by defining the precompiler directive `FAR_BOUNDS_FATAL`. If this is defined then bounds errors in checked arrays cause assertion failures. The location of this assertion failure can be checked with a debugger in the normal way.
+
 ### Fort files
 
 This is last because it isn't technically in any Fortran standard, even though it is widely supported by extant compilers and is permitted in the Fortran standard. It is permitted for logical unit numbers (LUNs) to be *preconnected* to specific inputs or outputs even if they can be manually connected to a different inputs or outputs. Some of these are preconnected to things like stdin, stderr and stdio, but for many compilers all non-special LUNs are preconnected to a file called `fort.{lun}` where `{lun}` is replaced with the LUN specified. This means that reading or writing to LUN 10 without expicitly opening it will read or write to the file `fort.10`. This is very helpful for debugging, so we have replicated this in FAR++. To use it, simply call `fortFile(lun)` which returns you a reference to an fstream object which is already opened on a file called `fort.{lun}`. You can freely close the file as required and it will be reopened if needed on the next call to `fortFile`

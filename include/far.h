@@ -115,11 +115,11 @@
 #endif
 #endif
 #ifndef FAR_INLINE_PREFIX
-#define FAR_INLINE_PREFIX __attribute__((flatten))
+#define FAR_INLINE_PREFIX __attribute__((flatten,always_inline))
 #endif
 #define FAR_INLINE FAR_INLINE_PREFIX inline
 #ifndef FAR_PURE_PREFIX
-#define FAR_PURE_PREFIX __attribute__((pure,flatten))
+#define FAR_PURE_PREFIX __attribute__((pure,flatten,always_inline))
 #endif
 #define FAR_PURE FAR_PURE_PREFIX inline
 #ifndef FAR_FLATTEN_PREFIX
@@ -1879,12 +1879,16 @@ namespace far
 							FAR_SIGNED_INDEX_TYPE item = static_cast<FAR_SIGNED_INDEX_TYPE>(c) * stride[rlevel];
 							if constexpr (bounds_check)
 							{
+#ifdef FAR_BOUNDS_FATAL
+								assert(c>=lb[rlevel] && c<=ub[rlevel]);
+#else
 								if (c < lb[rlevel] || c > ub[rlevel])
 								{
 									std::stringstream s;
 									s << "In index " << rlevel + 1 << ", " << c << " is outside the range of " << lb[rlevel] << " to " << ub[rlevel];
 									throw std::out_of_range(s.str());
 								}
+#endif
 							}
 							if constexpr (level < rank - 1)
 							{
@@ -2369,9 +2373,9 @@ namespace far
 					 * Round bracket operator. Gets the actual offset
 					 */
 					template <typename... Args,std::enable_if_t<is_correct_subscript<rank,Args...>, int> = 0>
-						FAR_PURE FAR_SIGNED_INDEX_TYPE operator()(Args... args) const
+						FAR_PURE FAR_UNSIGNED_INDEX_TYPE operator()(Args... args) const
 						{
-							FAR_SIGNED_INDEX_TYPE value = std::apply([this](auto... args){return this->buildIndex(args...);},packToTuple<order>(args...));
+							FAR_UNSIGNED_INDEX_TYPE value = std::apply([this](auto... args){return this->buildIndex(args...);},packToTuple<order>(args...));
 							return value;
 						}
 					/**
@@ -4322,7 +4326,7 @@ namespace far
 #ifndef SIMPLE_MEMORY
 								rdata = new valueType[index.getSize()];
 #else
-								rdata = (valueType*)std::malloc(sizeof(valueType)*index.getSize());
+								rdata = (valueType*)aligned_alloc(alignof(valueType),sizeof(valueType)*index.getSize());
 								for (FAR_UNSIGNED_INDEX_TYPE i=0;i<index.getSize();++i){
 									new(rdata+i) valueType();
 								}
