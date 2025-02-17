@@ -45,6 +45,21 @@
 #include "LBrefWrapper.h"
 #include "OMPDynamicShared.h"
 
+#if __STDCPP_MATH_SPEC_FUNCS__<201003L
+#define FAR_NEED_BOOST_MATHS
+#endif
+
+#ifdef FAR_NEED_BOOST_MATHS
+#if defined(__has_include)
+#if __has_include(<boost/math/special_functions/bessel.hpp>)
+#include <boost/math/special_functions/bessel.hpp>
+#define FAR_HAS_BOOST_MATHS
+#elif DEFINED FAR_HAS_BOOST_MATHS
+#include <boost/math/special_functions/bessel.hpp>
+#endif
+#endif
+#endif
+
 #ifdef _OPENMP
 #include <omp.h>
 #define FAR_OMP_BARRIER _Pragma("omp barrier")
@@ -6103,9 +6118,8 @@ namespace far
 								{  return std::atan2(y,x)/M_PI; };
 
 							return makeLazy<l>(std::forward<T1>(y),std::forward<T2>(x));
-
 						}
-#if __STDCPP_MATH_SPEC_FUNCS__>=201003L
+#ifndef FAR_NEED_BOOST_MATHS
 					/**
 					 * Fortran BESSEL_J0(https://fortranwiki.org/fortran/show/bessel_j0)
 					 */
@@ -6219,6 +6233,193 @@ namespace far
 								result(i) = std::cyl_neumann(i-1+n1,x);
 							}
 							return result;
+						}
+#elif defined FAR_HAS_BOOST_MATHS
+					/**
+					 * Fortran BESSEL_J0(https://fortranwiki.org/fortran/show/bessel_j0)
+					 */
+					template <typename T>
+						auto bessel_j0(T &&x)
+						{
+							AERRCHECKREAL(T,"bessel_j0","x")
+								auto l = [](typename arrayInfo<std::decay_t<T>>::type const &val) -> decltype(auto)
+								{  return boost::math::cyl_bessel_j(0,val); };
+							return makeLazy<l>(std::forward<T>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_J1(https://fortranwiki.org/fortran/show/bessel_j1)
+					 */
+					template <typename T>
+						auto bessel_j1(T &&x)
+						{
+							AERRCHECKREAL(T,"bessel_j1","x")
+								auto l = [](typename arrayInfo<std::decay_t<T>>::type const &val) -> decltype(auto)
+								{  return boost::math::cyl_bessel_j(1,val); };
+							return makeLazy<l>(std::forward<T>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2>
+						auto bessel_jn(T1 &&n, T2 &&x)
+						{
+							AERRCHECKINTEGER(T1,"bessel_jn","n")
+								AERRCHECKREAL(T2,"bessel_jn","x")
+								auto l = [](typename arrayInfo<std::decay_t<T1>>::type const &n, 
+										typename arrayInfo<std::decay_t<T2>>::type const &x) -> decltype(auto)
+								{  return boost::math::cyl_bessel_j(n,x); };
+							return makeLazy<l>(std::forward<T1>(n),std::forward<T2>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2, typename T3>
+						auto bessel_jn(T1 &&n1, T2 &&n2, T3 &&x)
+						{
+							static_assert(!arrayInfo<T1>::value,"n1 must not be an array in bessel_jn");
+							static_assert(!arrayInfo<T2>::value,"n2 must not be an array in bessel_jn");
+							static_assert(!arrayInfo<T3>::value,"x must not be an array in bessel_jn");
+
+							AERRCHECKINTEGER(T1,"bessel_jn","n1")
+								AERRCHECKINTEGER(T2,"bessel_jn","n2")
+								AERRCHECKREAL(T3,"bessel_jn","x")
+								Array<std::decay_t<T3>,1> result (n2-n1+1);
+							for (int i=1;i<=n2-n1+1;++i){
+								result(i) = boost::math::cyl_bessel_j(i-1+n1,x);
+							}
+							return result;
+						}
+
+					/**
+					 * Fortran BESSEL_Y0(https://fortranwiki.org/fortran/show/bessel_y0)
+					 */
+					template <typename T>
+						auto bessel_y0(T &&x)
+						{
+							AERRCHECKREAL(T,"bessel_y0","x")
+								auto l = [](typename arrayInfo<std::decay_t<T>>::type const &val) -> decltype(auto)
+								{  return boost::math::cyl_neumann(0,val); };
+							return makeLazy<l>(std::forward<T>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_Y1(https://fortranwiki.org/fortran/show/bessel_y1)
+					 */
+					template <typename T>
+						auto bessel_y1(T &&x)
+						{
+							AERRCHECKREAL(T,"bessel_y1","x")
+								auto l = [](typename arrayInfo<std::decay_t<T>>::type const &val) -> decltype(auto)
+								{  return boost::math::cyl_neumann(1,val); };
+							return makeLazy<l>(std::forward<T>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_yn)
+					 */
+					template <typename T1, typename T2>
+						auto bessel_yn(T1 &&n, T2 &&x)
+						{
+							AERRCHECKINTEGER(T1,"bessel_yn","n")
+								AERRCHECKREAL(T2,"bessel_yn","x")
+								auto l = [](typename arrayInfo<std::decay_t<T1>>::type const &n, typename arrayInfo<std::decay_t<T2>>::type const &x) -> decltype(auto)
+								{  return boost::math::cyl_neumann(n,x); };
+							return makeLazy<l>(std::forward<T1>(n),std::forward<T2>(x));
+						}
+
+					/**
+					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2, typename T3>
+						auto bessel_yn(T1 &&n1, T2 &&n2, T3 &&x)
+						{
+							static_assert(!arrayInfo<T1>::value,"n1 must not be an array in bessel_jn");
+							static_assert(!arrayInfo<T2>::value,"n2 must not be an array in bessel_jn");
+							static_assert(!arrayInfo<T3>::value,"x must not be an array in bessel_jn");
+
+							AERRCHECKINTEGER(T1,"bessel_yn","n1")
+								AERRCHECKINTEGER(T2,"bessel_yn","n2")
+								AERRCHECKREAL(T3,"bessel_yn","x")
+								Array<std::decay_t<T3>,1> result (n2-n1+1);
+							for (int i=1;i<=n2-n1+1;++i){
+								result(i) = boost::math::cyl_neumann(i-1+n1,x);
+							}
+							return result;
+						}
+#else
+					/**
+					 * Fortran BESSEL_J0(https://fortranwiki.org/fortran/show/bessel_j0)
+					 */
+					template <typename T>
+						auto bessel_j0(T &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_J1(https://fortranwiki.org/fortran/show/bessel_j1)
+					 */
+					template <typename T>
+						auto bessel_j1(T &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2>
+						auto bessel_jn(T1 &&n, T2 &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2, typename T3>
+						auto bessel_jn(T1 &&n1, T2 &&n2, T3 &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_Y0(https://fortranwiki.org/fortran/show/bessel_y0)
+					 */
+					template <typename T>
+						auto bessel_y0(T &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_Y1(https://fortranwiki.org/fortran/show/bessel_y1)
+					 */
+					template <typename T>
+						auto bessel_y1(T &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_yn)
+					 */
+					template <typename T1, typename T2>
+						auto bessel_yn(T1 &&n, T2 &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+						}
+
+					/**
+					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_jn)
+					 */
+					template <typename T1, typename T2, typename T3>
+						auto bessel_yn(T1 &&n1, T2 &&n2, T3 &&x)
+						{
+						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 #endif
 
