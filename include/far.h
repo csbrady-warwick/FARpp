@@ -6105,7 +6105,7 @@ namespace far
 							return makeLazy<l>(std::forward<T1>(y),std::forward<T2>(x));
 
 						}
-
+#if __STDCPP_MATH_SPEC_FUNCS__>=201003L
 					/**
 					 * Fortran BESSEL_J0(https://fortranwiki.org/fortran/show/bessel_j0)
 					 */
@@ -6220,6 +6220,7 @@ namespace far
 							}
 							return result;
 						}
+#endif
 
 					/**
 					 * Fortran BGE(https://fortranwiki.org/fortran/show/bge)
@@ -6228,8 +6229,8 @@ namespace far
 						auto bge(T1 &&i, T2 &&j)
 						{
 							AERRCHECKINTEGER(T1,"bge","i")
-								AERRCHECKINTEGER(T2,"bge","j")
-								using At1 = typename arrayInfo<T1>::type;
+							AERRCHECKINTEGER(T2,"bge","j")
+							using At1 = typename arrayInfo<T1>::type;
 							using At2 = typename arrayInfo<T2>::type;
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
