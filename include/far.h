@@ -54,7 +54,7 @@
 #if __has_include(<boost/math/special_functions/bessel.hpp>)
 #include <boost/math/special_functions/bessel.hpp>
 #define FAR_HAS_BOOST_MATHS
-#elif DEFINED FAR_HAS_BOOST_MATHS
+#elif defined(FAR_HAS_BOOST_MATHS)
 #include <boost/math/special_functions/bessel.hpp>
 #endif
 #endif
@@ -422,7 +422,7 @@ namespace far
 		{
 			private:
 			static constexpr bool isLBWrapper = isLBrefWrapper<T>::value;
-			using unwrappedType = isLBrefWrapper<std::decay_t<T>>::type;
+			using unwrappedType = typename isLBrefWrapper<std::decay_t<T>>::type;
 			public:
 			using qualifiedType = unwrappedType;
 			using wrappedType = T;
@@ -447,7 +447,7 @@ namespace far
 			private:
 				using uqcore = typename std::decay_t<T>::core_type;
 				static constexpr bool isLBWrapper = isLBrefWrapper<uqcore>::value;
-				using unwrappedType = isLBrefWrapper<std::decay_t<uqcore>>::type;
+				using unwrappedType = typename isLBrefWrapper<std::decay_t<uqcore>>::type;
 			public:
 				using type = unwrappedType;
 				using wrappedType = uqcore;
@@ -1744,11 +1744,11 @@ namespace far
 							}
 						}
 
-					template<int level, typename T_other, typename current, typename... others>
+					template<int srank, int level, typename T_other, typename current, typename... others>
 					FAR_INLINE void build_slice_offset(T_other & other, current in, others... r)
 					{
 						Range c;
-						constexpr FAR_UNSIGNED_INDEX_TYPE rlevel = (order==0?level:rank-level-1);
+						constexpr FAR_UNSIGNED_INDEX_TYPE rlevel = (order==0?level:srank-level-1);
 						constexpr bool is_range = !std::is_integral_v<current>;
 						if constexpr (!is_range)
 						{
@@ -1763,18 +1763,18 @@ namespace far
 							if (c.stride<0) std::swap(c.lb,c.ub);
 #endif
 						}
-						if constexpr (sizeof...(others)>0) build_slice_offset<level+1>(other, r...);
+						if constexpr (sizeof...(others)>0) build_slice_offset<srank, level+1>(other, r...);
 						slice_offset = slice_offset * other.n[rlevel] + ((c.stride>0?c.lb:c.ub) - other.lb[rlevel]) * other.stride[rlevel];	
 					}
 
 					/**
 					 * Build the information needed for a slice of an array
 					 */
-					template <int level=0, int slevel=0, bool firstcall=true, typename T_other, typename current, typename... rest>
+					template <int srank, int level=0, int slevel=0, bool firstcall=true, typename T_other, typename current, typename... rest>
 						FAR_INLINE void build_slice(T_other &other, current in, rest... r)
 						{
 							if constexpr( level == rank) {
-								build_slice_offset<slevel>(other,in,r...);
+								build_slice_offset<srank, slevel>(other,in,r...);
 							} else {
 
 								Range c;
@@ -1822,7 +1822,7 @@ namespace far
 								stride[rlevel] *= c.stride * other.stride[rslevel] * (is_range?1:(other.n[rslevel]*other.stride[rslevel]*c.stride));
 
 								if constexpr(sizeof...(rest)>0){
-									build_slice<level + (should_advance?1:0),slevel+1,false>(other, r...);
+									build_slice<srank, level + (should_advance?1:0),slevel+1,false>(other, r...);
 								}
 								if constexpr(is_range){
 									offset = offset * n[rlevel] - stride[rlevel] * lb[rlevel];
@@ -3194,7 +3194,7 @@ namespace far
 				class array_iterator{
 					friend T_core;
 					static const int rank = T_core::core_rank;
-					using return_type = T_core::core_type;
+					using return_type = typename T_core::core_type;
 					private:
 
 					FAR_SIGNED_INDEX_TYPE offset=-1;
@@ -3938,7 +3938,7 @@ namespace far
 					template<typename To>
 					void operator=(To&& other){
 						static_assert(std::is_reference_v<return_type>,"Assignment to lazy array must be to a reference");
-						using other_core = arrayInfo<To>::type;
+						using other_core = typename arrayInfo<To>::type;
 						forEach<[](return_type a, const other_core &other) {a=other;}>(*this, std::forward<To>(other));
 					}
 
@@ -4147,7 +4147,7 @@ namespace far
 
 			template <auto callable, typename lindexer=void, typename...types>
 				static auto makeLazy(types&&... params){
-					using paramInfo =  arraySetInfo<callable,0,types...>;
+					using paramInfo = arraySetInfo<callable,0,types...>;
 					static_assert(paramInfo::isGood,"Parameters to function are inconsistent with function signature");
 					using indexer = std::conditional_t<std::is_void_v<lindexer>,typename paramInfo::info::index,lindexer>;
 					if constexpr(!std::is_void_v<indexer> && paramInfo::anyUnmatched){
@@ -4900,7 +4900,7 @@ namespace far
 							auto slice(Args... slice_info)
 							{
 								constexpr static int rrank = countRanges<Args...>();
-								using type = arrayInfo<decltype(*this)>::type;
+								using type = typename arrayInfo<decltype(*this)>::type;
 								using dest_type = std::invoke_result_t<decltype(std::decay_t<decltype(*this)>:: template buildVariant<type, rrank, bounds_check, false>)>;
 								dest_type ret;
 #ifdef LOCK
@@ -4915,7 +4915,7 @@ namespace far
 									decltype(*this) &demo = *this;
 									ret.pointSimple(demo);
 									constexpr int order = arrayInfo<decltype(*this)>::order;
-									std::apply([&ret,this](auto... args){ret.index.build_slice(index, args...);},packToTuple<order>(slice_info...));
+									std::apply([&ret,this](auto... args){ret.index.template build_slice<rank>(index, args...);},packToTuple<order>(slice_info...));
 									ret.rdata += ret.index.slice_offset;
 									// DO NOT SHIFT BDATA
 
@@ -4942,7 +4942,7 @@ namespace far
 							template<auto ptr, ert returnType=ert::Auto, typename... T_others>
 							auto callMethod(T_others&&... params){
 
-								auto l = [](core_type &d, arrayInfo<T_others>::referenceType... params) -> decltype(auto){
+								auto l = [](core_type &d, typename arrayInfo<T_others>::referenceType... params) -> decltype(auto){
 									return (d.*ptr)(std::forward<typename arrayInfo<T_others>::referenceType>(params)...);
 								};
 								constexpr bool noReturn = std::is_void_v<typename callableTraits<decltype(l)>::type>;
@@ -6356,7 +6356,8 @@ namespace far
 					template <typename T>
 						auto bessel_j0(T &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+					    static_assert(std::is_same<T, void>::value,
+								"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6365,7 +6366,8 @@ namespace far
 					template <typename T>
 						auto bessel_j1(T &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6374,7 +6376,8 @@ namespace far
 					template <typename T1, typename T2>
 						auto bessel_jn(T1 &&n, T2 &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T1, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6383,7 +6386,8 @@ namespace far
 					template <typename T1, typename T2, typename T3>
 						auto bessel_jn(T1 &&n1, T2 &&n2, T3 &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T1, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6392,7 +6396,8 @@ namespace far
 					template <typename T>
 						auto bessel_y0(T &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6401,7 +6406,8 @@ namespace far
 					template <typename T>
 						auto bessel_y1(T &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6410,7 +6416,8 @@ namespace far
 					template <typename T1, typename T2>
 						auto bessel_yn(T1 &&n, T2 &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T1, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 
 					/**
@@ -6419,7 +6426,8 @@ namespace far
 					template <typename T1, typename T2, typename T3>
 						auto bessel_yn(T1 &&n1, T2 &&n2, T3 &&x)
 						{
-						static_assert(false,"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
+              static_assert(std::is_same<T1, void>::value,
+                "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
 						}
 #endif
 
@@ -6429,15 +6437,21 @@ namespace far
 					template <typename T1, typename T2>
 						auto bge(T1 &&i, T2 &&j)
 						{
-							AERRCHECKINTEGER(T1,"bge","i")
-							AERRCHECKINTEGER(T2,"bge","j")
-							using At1 = typename arrayInfo<T1>::type;
-							using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T1,"bge","i")
+              AERRCHECKINTEGER(T2,"bge","j")
+              using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
+#if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
+						static_assert(std::is_same<T1, void>::value,
+			        "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
+						return true;
+#else
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
 							auto l =[](At1 &u1, At2 &u2){return std::bit_cast<Unsigned1>(u1)>=std::bit_cast<Unsigned2>(u2);};
 							return makeLazy<l>(std::forward<T1>(i),std::forward<T2>(j));
+#endif
 						}
 
 					/**
@@ -6446,16 +6460,21 @@ namespace far
 					template <typename T1, typename T2>
 						auto bgt(T1 &&i, T2 &&j)
 						{
-							AERRCHECKINTEGER(T1,"bgt","i")
-								AERRCHECKINTEGER(T2,"bgt","j")
-								using At1 = typename arrayInfo<T1>::type;
-							using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T1,"bgt","i")
+                AERRCHECKINTEGER(T2,"bgt","j")
+                using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
+#if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
+            static_assert(std::is_same<T1, void>::value,
+              "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
+						return true;
+#else
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
 							auto l =[](At1 &u1, At2 &u2){return std::bit_cast<Unsigned1>(u1)>std::bit_cast<Unsigned2>(u2);};
 							return makeLazy<l>(std::forward<T1>(i),std::forward<T2>(j));
-
+#endif
 						}
 
 					/**
@@ -6465,22 +6484,27 @@ namespace far
 						auto bit_size(FAR_UNUSED T&& i){
 							return CHAR_BIT * sizeof(typename arrayInfo<T>::type);
 						}
-
 					/**
 					 * Fortran BLE(https://fortranwiki.org/fortran/show/ble)
 					 */
 					template <typename T1, typename T2>
 						auto ble(T1 &&i, T2 &&j)
 						{
-							AERRCHECKINTEGER(T1,"ble","i")
-								AERRCHECKINTEGER(T2,"ble","j")
-								using At1 = typename arrayInfo<T1>::type;
-							using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T1,"ble","i")
+                AERRCHECKINTEGER(T2,"ble","j")
+                using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
+#if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
+            static_assert(std::is_same<T1, void>::value,
+              "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
+            return true;
+#else
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
 							auto l =[](At1 &u1, At2 &u2){return std::bit_cast<Unsigned1>(u1)<=std::bit_cast<Unsigned2>(u2);};
 							return makeLazy<l>(std::forward<T1>(i),std::forward<T2>(j));
+#endif
 						}
 
 					/**
@@ -6489,17 +6513,22 @@ namespace far
 					template <typename T1, typename T2>
 						auto blt(T1 &&i, T2 &&j)
 						{
-							AERRCHECKINTEGER(T1,"blt","i")
-								AERRCHECKINTEGER(T2,"blt","j")
-								using At1 = typename arrayInfo<T1>::type;
-							using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T1,"blt","i")
+                AERRCHECKINTEGER(T2,"blt","j")
+                using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
+#if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
+            static_assert(std::is_same<T1, void>::value,
+              "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
+            return true;
+#else
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
 							auto l =[](At1 &u1, At2 &u2){return std::bit_cast<Unsigned1>(u1)<std::bit_cast<Unsigned2>(u2);};
 							return makeLazy<l>(std::forward<T1>(i),std::forward<T2>(j));
+#endif
 						}
-
 					/**
 					 * Fortran BTEST(https://fortranwiki.org/fortran/show/btest)
 					 */
@@ -7458,7 +7487,7 @@ namespace far
 						auto iall(T &&source)
 						{
 							AERRCHECKINTEGER(T,"iall","array")					
-								using type=arrayInfo<T>::type;
+							using type=typename arrayInfo<T>::type;
 							return reduction<[](const type &src, type &dest){dest&=src;},
 										 defaultFunction,
 										 [](type &dest){dest=~type(0);}
@@ -7474,8 +7503,8 @@ namespace far
 						{
 							AERRCHECKINTEGER(T,"iall","array")
 								AERRCHECKINTEGER(T_mask,"iall","mask")
-								using type=arrayInfo<T>::type;
-							using maskType = arrayInfo<T_mask>::type;
+							using type=typename arrayInfo<T>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reduction<[](const type &src, type &dest, const maskType &mask){dest&=mask?src:~type(0);},
 										 defaultFunction,
 										 [](type &dest){dest=~type(0);}
@@ -7491,7 +7520,7 @@ namespace far
 						{
 							AERRCHECKINTEGER(T,"iall","array")
 								// Produce an array with the summed direction removed
-								using type=arrayInfo<T>::type;
+								using type=typename arrayInfo<T>::type;
 							return reductionWithDirection<[](const type &src, type &dest){dest&=src;},
 										 defaultFunction,
 										 [](type &dest){dest=~type(0);}
@@ -7508,8 +7537,8 @@ namespace far
 							AERRCHECKINTEGER(T,"iall","array")
 								AERRCHECKTRUTHY(T_mask,"iall","mask")
 								// Produce an array with the summed direction removed
-								using type=arrayInfo<T>::type;
-							using maskType = arrayInfo<T_mask>::type;
+								using type=typename arrayInfo<T>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reductionWithDirection<[](const type &src, type &dest, const maskType &mask){
 								dest&=mask?src:~type(0);},
 										 defaultFunction,
@@ -7539,7 +7568,7 @@ namespace far
 						auto iany(T &&source)
 						{
 							AERRCHECKINTEGER(T,"iany","array")
-								using type=arrayInfo<T>::type;
+								using type=typename arrayInfo<T>::type;
 							return reduction<[](const type &src, type &dest){dest|=src;},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7555,8 +7584,8 @@ namespace far
 						{
 							AERRCHECKINTEGER(T,"iany","array")
 							AERRCHECKTRUTHY(T_mask,"iany","mask")
-							using type=arrayInfo<T>::type;
-							using maskType = arrayInfo<T_mask>::type;
+							using type=typename arrayInfo<T>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reduction<[](const type &src, type &dest, const maskType &mask){dest|=mask?src:type(0);},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7573,7 +7602,7 @@ namespace far
 						{
 							AERRCHECKINTEGER(T,"iany","array")
 							// Produce an array with the summed direction removed
-							using type=arrayInfo<T>::type;
+							using type=typename arrayInfo<T>::type;
 							return reductionWithDirection<[](const type &src, type &dest){dest|=src;},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7589,8 +7618,8 @@ namespace far
 						{
 							AERRCHECKINTEGER(T,"iany","array")
 							AERRCHECKTRUTHY(T_mask,"iany","mask")
-							using type=arrayInfo<T>::type;
-							using maskType = arrayInfo<T_mask>::type;
+							using type=typename arrayInfo<T>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reductionWithDirection<[](const type &src, type &dest, const maskType &mask){dest|=mask?src:type(0);},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7717,7 +7746,7 @@ namespace far
 					template <typename T_array, typename T_value>
 						void iota(T_array &&array, T_value value)
 						{
-							forEachSerial<([](arrayInfo<T_array>::type& item, T_value &value)
+							forEachSerial<([](typename arrayInfo<T_array>::type& item, T_value &value)
 									{item = value++;})>(std::forward<T_array>(array),std::forward<T_value>(value));
 						}
 
@@ -7728,7 +7757,7 @@ namespace far
 						auto iparity(T_array &&array)
 						{
 							AERRCHECKINTEGER(T_array,"iparity","array");
-							using type=arrayInfo<T_array>::type;
+							using type=typename arrayInfo<T_array>::type;
 							return reduction<[](const type &src, type &dest){dest^=src;},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7745,8 +7774,8 @@ namespace far
 						{
 							AERRCHECKINTEGER(T_array,"iparity","array");
 							AERRCHECKTRUTHY(T_mask,"iparity","mask");
-							using type=arrayInfo<T_array>::type;
-							using maskType = arrayInfo<T_mask>::type;
+							using type=typename arrayInfo<T_array>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reduction<[](const type &src, type &dest, const maskType &mask){dest^=mask?src:type(0);},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7763,7 +7792,7 @@ namespace far
 						{
 							AERRCHECKINTEGER(T_array,"iparity","array");
 							// Produce an array with the summed direction removed
-							using type=arrayInfo<T_array>::type;
+							using type=typename arrayInfo<T_array>::type;
 							return reductionWithDirection<[](const type &src, type &dest){dest^=src;},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7779,8 +7808,8 @@ namespace far
 						{
 							AERRCHECKINTEGER(T_array,"iparity","array")
 								AERRCHECKTRUTHY(T_mask,"iparity","mask")
-								using type=arrayInfo<T_array>::type;
-							using maskType = arrayInfo<T_mask>::type;
+								using type=typename arrayInfo<T_array>::type;
+							using maskType = typename arrayInfo<T_mask>::type;
 							return reductionWithDirection<[](const type &src, type &dest, const maskType &mask){dest^=mask?src:type(0);},
 										 defaultFunction,
 										 [](type &dest){dest=type(0);}
@@ -7837,7 +7866,7 @@ namespace far
 					 * either the underlying type in an array or the type of the item called with
 					 */
 					template<typename T_i>
-						using kind = arrayInfo<T_i>::type;
+						using kind = typename arrayInfo<T_i>::type;
 
 					/**
 					 * Fortran LBOUND(https://fortranwiki.org/fortran/show/lbound)
@@ -7845,7 +7874,7 @@ namespace far
 					template<typename kind=FAR_SIGNED_INDEX_TYPE, typename T_i=double>
 						auto lbound(T_i &&array){
 #ifdef RANK1_INQUIRY_IS_VALUE
-							if constexpr(arrayInfo<T_i>::rank==1) {
+							if constexpr(typename arrayInfo<T_i>::rank==1) {
 								kind result = array.getLB(1);
 								return result;
 							}
@@ -8752,7 +8781,7 @@ namespace far
 						auto merge_bits(T_i &&i, T_j &&j, T_mask &&mask){
 							AERRCHECKINTEGER(T_i,"merge_bits","i");
 							AERRCHECKINTEGER(T_i,"merge_bits","i");
-							auto l = [](const arrayInfo<T_i>::type&i, const arrayInfo<T_j>::type&j, const arrayInfo<T_mask>::type&mask){
+							auto l = [](const typename arrayInfo<T_i>::type&i, const typename arrayInfo<T_j>::type&j, const typename arrayInfo<T_mask>::type&mask){
 								return (i & mask) | (j & ~mask);
 							};
 							return makeLazy<l>(std::forward<T_i>(i),std::forward<T_j>(j),std::forward<T_mask>(mask));
@@ -9230,11 +9259,11 @@ namespace far
 							AERRCHECKINTEGER(T_len,"mvbits","len");
 							AERRCHECKINTEGER(T_to,"mvbits","to");
 							AERRCHECKINTEGER(T_topos,"mvbits","topos");
-							using fromitem = arrayInfo<T_from>::type;
-							using frompositem = arrayInfo<T_frompos>::type;
-							using lenitem = arrayInfo<T_len>::type;
-							using toitem = arrayInfo<T_to>::type;
-							using topositem = arrayInfo<T_topos>::type;
+							using fromitem = typename arrayInfo<T_from>::type;
+							using frompositem = typename arrayInfo<T_frompos>::type;
+							using lenitem = typename arrayInfo<T_len>::type;
+							using toitem = typename arrayInfo<T_to>::type;
+							using topositem = typename arrayInfo<T_topos>::type;
 							constexpr bool anyArray = arrayInfo<T_from>::value || arrayInfo<T_to>::value || arrayInfo<T_frompos>::value || arrayInfo<T_len>::value || arrayInfo<T_topos>::value;
 							static_assert(std::is_same_v<fromitem,toitem>,"From and To must be of the same kind in mvbits");
 							//To can be an array when from isn't, but From can't be an array if To isn't
@@ -9259,8 +9288,8 @@ namespace far
 						{
 							AERRCHECKREAL(T_x,"nearest","x");
 							AERRCHECKREAL(T_s,"nearest","s");
-							using xitem = arrayInfo<T_x>::type;
-							using sitem = arrayInfo<T_s>::type;
+							using xitem = typename arrayInfo<T_x>::type;
+							using sitem = typename arrayInfo<T_s>::type;
 							static_assert(is_floating_point<T_x>, "x must be floating point in nearest");
 							auto l = [](xitem const &x, sitem const &s) -> auto
 							{
@@ -9277,7 +9306,7 @@ namespace far
 						auto nint(T_x &&x)
 						{
 							AERRCHECKREALCOMPLEX(T_x,"nint","x");
-							using xitem = arrayInfo<T_x>::type;
+							using xitem = typename arrayInfo<T_x>::type;
 							auto l = [](xitem const &x) -> kind
 							{
 								if constexpr(is_complex<xitem>){
@@ -9495,7 +9524,7 @@ namespace far
 					template <typename T_array>
 						auto pack(T_array &&array)
 						{
-							using type = arrayInfo<T_array>::type;
+							using type = typename arrayInfo<T_array>::type;
 							constexpr int rank = arrayInfo<T_array>::rank;
 							auto packed = array.template buildVariant<type,1>();
 							packed.allocate(array.getSize());
@@ -9522,8 +9551,8 @@ namespace far
 					template <typename T_array, typename T_mask>
 						auto pack(T_array &&array, T_mask &&mask)
 						{
-							using type = arrayInfo<T_array>::type;
-							using mask_type = arrayInfo<T_mask>::type;
+							using type = typename arrayInfo<T_array>::type;
+							using mask_type = typename arrayInfo<T_mask>::type;
 							constexpr int rank = arrayInfo<T_array>::rank;
 							auto packed = array.template buildVariant<type,1>();
 							//If mask is an array then count true elements
@@ -9560,8 +9589,8 @@ namespace far
 					template <typename T_array, typename T_mask, typename T_vector>
 						auto pack(T_array &&array, T_mask &&mask, T_vector &&vector)
 						{
-							using type = arrayInfo<T_array>::type;
-							using mask_type = arrayInfo<T_mask>::type;
+							using type = typename arrayInfo<T_array>::type;
+							using mask_type = typename arrayInfo<T_mask>::type;
 							constexpr int rank = arrayInfo<T_array>::rank;
 							auto packed = array.template buildVariant<type,1>();
 							//If mask is an array then count true elements
@@ -10121,7 +10150,7 @@ namespace far
 
 					template<typename T, typename T_op>
 						auto reduce(T&& array, T_op &&operation, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
+							using atype = typename arrayInfo<T>::type;
 							atype result={};
 							bool active = false;
 
@@ -10142,8 +10171,8 @@ namespace far
 					 */
 					template<typename T, typename T_op, typename T_mask>
 						auto reduce_with_mask(T&& array, T_op &&operation, T_mask &&mask, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
-							using masktype = arrayInfo<T_mask>::type;
+							using atype = typename arrayInfo<T>::type;
+							using masktype = typename arrayInfo<T_mask>::type;
 							atype result={};
 							bool active = false;
 
@@ -10167,7 +10196,7 @@ namespace far
 					 */
 					template<typename T, typename T_op, typename T_identity>
 						auto reduce_with_identity(T&& array, T_op &&operation, T_identity &&identity, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
+							using atype = typename arrayInfo<T>::type;
 							static_assert(!arrayInfo<T_identity>::value,"identity must be scalar in reduce_with_identity");
 							static_assert(std::is_assignable_v<atype&,std::decay_t<T_identity>>,"identity must be assignable to array in reduce_with_identity");
 							atype result={};
@@ -10191,8 +10220,8 @@ namespace far
 					 */
 					template<typename T, typename T_op, typename T_mask, typename T_identity>
 						auto reduce_with_mask_and_identity(T&& array, T_op &&operation, T_mask &&mask, T_identity &&identity, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
-							using mtype = arrayInfo<T_mask>::type;
+							using atype = typename arrayInfo<T>::type;
+							using mtype = typename arrayInfo<T_mask>::type;
 							static_assert(!arrayInfo<T_identity>::value,"identity must be scalar in reduce_with_mask_and_identity");
 							static_assert(std::is_assignable_v<atype&,std::decay_t<T_identity>>,"identity must be assignable to array in reduce_with_mask_and_identity");
 							atype result={};
@@ -10220,7 +10249,7 @@ namespace far
 
 					template<typename T, typename T_op>
 						auto reduce(T&& array, T_op &&operation, int dim, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
+							using atype = typename arrayInfo<T>::type;
 							auto result = reduce_rank<atype>(array, dim);
 							auto active = reduce_rank<bool>(array,dim);
 							if (array.getSize()==0) throw std::out_of_range("Initial sequence is empty");
@@ -10244,7 +10273,7 @@ namespace far
 
 					template<typename T, typename T_op, typename T_identity>
 						auto reduce_with_identity(T&& array, T_op &&operation, int dim, T_identity &&identity, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
+							using atype = typename arrayInfo<T>::type;
 							static_assert(!arrayInfo<T_identity>::value,"identity must be scalar in reduce_with_identity");
 							static_assert(std::is_assignable_v<atype&,std::decay_t<T_identity>>,"identity must be assignable to array in reduce_with_identity");
 							auto result = reduce_rank<atype>(array, dim);
@@ -10271,8 +10300,8 @@ namespace far
 
 					template<typename T, typename T_op, typename T_mask>
 						auto reduce_with_mask(T&& array, T_op &&operation, int dim, T_mask &&mask, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
-							using mask_type = arrayInfo<T_mask>::type;
+							using atype = typename arrayInfo<T>::type;
+							using mask_type = typename arrayInfo<T_mask>::type;
 							auto result = reduce_rank<atype>(array, dim);
 							auto active = reduce_rank<bool>(array,dim);
 							active = false;
@@ -10296,8 +10325,8 @@ namespace far
 					 */
 					template<typename T, typename T_op, typename T_mask, typename T_identity>
 						auto reduce_with_mask_and_identity(T&& array, T_op &&operation, int dim, T_mask&&mask, T_identity &&identity, FAR_UNUSED bool ordered=true){
-							using atype = arrayInfo<T>::type;
-							using mask_type = arrayInfo<T_mask>::type;
+							using atype = typename arrayInfo<T>::type;
+							using mask_type = typename arrayInfo<T_mask>::type;
 							static_assert(!arrayInfo<T_identity>::value,"identity must be scalar in reduce_with_identity");
 							static_assert(std::is_assignable_v<atype&,std::decay_t<T_identity>>,"identity must be assignable to array in reduce_with_identity");
 							auto result = reduce_rank<atype>(array, dim);
@@ -10417,7 +10446,7 @@ namespace far
 								source.rdata=nullptr;
 							} else {
 								auto its = source.begin();
-								forEach<[](arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator){
+								forEach<[](typename arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator){
 									dest = *iterator++;
 								}> (result,its);
 							}
@@ -10447,7 +10476,7 @@ namespace far
 								auto pts = pad.begin();
 								auto ptc = pad.begin();
 								auto pte = pad.end();
-								forEach<[](arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator, std::decay_t<decltype(its)> &end, 
+								forEach<[](typename arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator, std::decay_t<decltype(its)> &end, 
 										std::decay_t<decltype(pts)> &padstart, std::decay_t<decltype(ptc)> &padit, std::decay_t<decltype(pte)> &padend){
 									if (iterator<end){
 										dest = *iterator++;
@@ -10480,7 +10509,7 @@ namespace far
 							} else {
 								auto its = source.begin();
 								auto ite = source.end();
-								forEach<[](arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator, std::decay_t<decltype(its)> &end, std::decay_t<decltype(pad)> &pad){
+								forEach<[](typename arrayInfo<atype>::type &dest, std::decay_t<decltype(its)> &iterator, std::decay_t<decltype(its)> &end, std::decay_t<decltype(pad)> &pad){
 									if (iterator<end){
 										dest = *iterator++;
 									} else {
@@ -10628,7 +10657,7 @@ namespace far
 						auto rrspacing(T_x &&x)
 						{
 							AERRCHECKREAL(T_x,"rrspacing","x")
-								using type = arrayInfo<T_x>::type;
+							using type = typename arrayInfo<T_x>::type;
 							auto l = [](type const &x) -> decltype(auto)
 							{ 
 								int exponent;
@@ -10811,8 +10840,8 @@ namespace far
 						{
 							AERRCHECKREAL(T_x,"set_exponent","x");
 							AERRCHECKINTEGER(T_i,"set_exponent","i");
-							using xtype = arrayInfo<T_x>::type;
-							using itype = arrayInfo<T_i>::type;
+							using xtype = typename arrayInfo<T_x>::type;
+							using itype = typename arrayInfo<T_i>::type;
 							auto l = [](xtype const &x,
 									itype const &i) -> decltype(auto)
 							{
@@ -10848,10 +10877,15 @@ namespace far
 					template <typename T_i, typename T_shift>
 						auto shifta(T_i &&i, T_shift &&shift)
 						{
-							AERRCHECKINTEGER(T_i,"shifta","i");
-							AERRCHECKINTEGER(T_shift,"shifta","shift");
-							using type = typename arrayInfo<T_i>::type;
-							using shiftType = typename arrayInfo<T_shift>::type;
+              AERRCHECKINTEGER(T_i,"shifta","i");
+              AERRCHECKINTEGER(T_shift,"shifta","shift");
+              using type = typename arrayInfo<T_i>::type;
+              using shiftType = typename arrayInfo<T_shift>::type;
+#if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
+            static_assert(std::is_same<T_i, void>::value,
+              "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
+            return type();
+#else
 							//Algebraic shift for both signed and unsigned integers
 							auto l =[](type const &i, shiftType const &shift) -> decltype(auto)
 							{
@@ -10867,6 +10901,7 @@ namespace far
 								}
 							};
 							return makeLazy<l>(std::forward<T_i>(i),std::forward<T_shift>(shift));
+#endif
 						}
 
 					/**
@@ -11026,7 +11061,7 @@ namespace far
 						auto spread(T_source&& source, int dim, FAR_SIGNED_INDEX_TYPE copies)
 						{
 							constexpr int rank = arrayInfo<T_source>::rank;
-							using coreType = arrayInfo<T_source>::type;
+							using coreType = typename arrayInfo<T_source>::type;
 							if constexpr(rank==0){
 								contiguousIndexBuilder<1> fib(copies);
 								return lazyArray<[](const coreType &t){return t;},contiguousIndexBuilder<1>, coreType>(fib,source);
@@ -11221,8 +11256,8 @@ namespace far
 					template <typename T_source, typename T_mold>
 						auto transfer(T_source &&source, T_mold &&mold)
 						{
-							using sourceType = arrayInfo<T_source>::type;
-							using moldType = arrayInfo<T_mold>::type;
+							using sourceType = typename arrayInfo<T_source>::type;
+							using moldType = typename arrayInfo<T_mold>::type;
 
 							if constexpr(arrayInfo<T_mold>::value){
 								//Mold is an array, so result is an array large enough to store all of source
@@ -11291,8 +11326,8 @@ namespace far
 					template <typename T_source, typename T_mold>
 						auto transfer(T_source &&source, FAR_UNUSED T_mold &&mold, FAR_SIGNED_INDEX_TYPE size)
 						{
-							using sourceType = arrayInfo<T_source>::type;
-							using moldType = arrayInfo<T_mold>::type;
+							using sourceType = typename arrayInfo<T_source>::type;
+							using moldType = typename arrayInfo<T_mold>::type;
 
 							if constexpr(arrayInfo<T_source>::value){
 								//Source is also an array
@@ -11387,9 +11422,9 @@ namespace far
 					template <typename T_vector, typename T_mask, typename T_field>
 						auto unpack(T_vector &&vector, T_mask &&mask, T_field &&field)
 						{
-							using type = arrayInfo<T_vector>::type;
-							using mask_type = arrayInfo<T_mask>::type;
-							using field_type = arrayInfo<T_field>::type;
+							using type = typename arrayInfo<T_vector>::type;
+							using mask_type = typename arrayInfo<T_mask>::type;
+							using field_type = typename arrayInfo<T_field>::type;
 							constexpr int rank = arrayInfo<T_mask>::rank;
 							static_assert(arrayInfo<T_vector>::rank==1,"vector must be rank 1 in unpack");
 							auto unpacked = vector.template buildVariant<type,rank>();
@@ -11466,7 +11501,7 @@ namespace far
 					template <typename T_condition, typename T_where, typename... T_params>
 						void where(T_condition &&condition, T_where &&where, T_params&&... params)
 						{
-							forEach<([](T_condition &condition, T_where &where, arrayInfo<T_params>::type&... params)
+							forEach<([](T_condition &condition, T_where &where, typename arrayInfo<T_params>::type&... params)
 									{if (condition(params...)){where(params...);} })>(condition,where,params...);
 						}
 
@@ -11477,7 +11512,7 @@ namespace far
 					template <typename T_condition, typename T_where, typename T_elsewhere, typename... T_params>
 						void where_elsewhere(T_condition &&condition, T_where &&where, T_elsewhere &&elsewhere, T_params&&... params)
 						{
-							forEach<([](T_condition &condition, T_where &where, T_elsewhere &elsewhere, arrayInfo<T_params>::type&... params)
+							forEach<([](T_condition &condition, T_where &where, T_elsewhere &elsewhere, typename arrayInfo<T_params>::type&... params)
 									{if (condition(params...)){where(params...);} else {elsewhere(params...);} })>(condition,where,elsewhere,params...);
 						}
 
@@ -11582,7 +11617,7 @@ namespace far
 						FAR_INLINE auto operator-(T &&lhs)
 						{
 							using lhs_base = std::decay_t<T>;
-							using index = arrayInfo<T>::index;
+							using index = typename arrayInfo<T>::index;
 							auto l = [](typename arrayInfo<lhs_base>::type const &op) -> decltype(auto)
 							{  return -op; };
 							auto a = lazyArray<l, index, decltype(lhs)>(std::forward<T>(lhs));
@@ -11943,7 +11978,7 @@ namespace far
 					template <typename T, typename = std::enable_if_t<std::is_base_of_v<array_base,clean<T>>>>
 						FAR_INLINE auto operator!(T &&op)
 						{
-							using base = arrayInfo<std::decay_t<T>>::type;
+							using base = typename arrayInfo<std::decay_t<T>>::type;
 							auto l = [](base const &op) -> decltype(auto)
 							{  return !op; };
 							return makeLazy<l>(std::forward<T>(op));
@@ -11955,7 +11990,7 @@ namespace far
 					template <typename T, typename = std::enable_if_t<std::is_base_of_v<array_base,clean<T>>>>
 						FAR_INLINE auto operator~(T &&op)
 						{
-							using base = arrayInfo<std::decay_t<T>>::type;
+							using base = typename arrayInfo<std::decay_t<T>>::type;
 							auto l = [](base const &op) -> base
 							{  return ~op; };
 							return makeLazy<l>(std::forward<T>(op));
@@ -12079,7 +12114,7 @@ namespace far
 					template <isIterable T>
 						auto toArray(const T &source)
 						{
-							using coreType = std::decay_t<T>::value_type;
+							using coreType = typename std::decay_t<T>::value_type;
 							Array<coreType,1> result(source.size());
 							FAR_SIGNED_INDEX_TYPE index = result.getLB(1);
 							for (auto &item : source)
@@ -12117,7 +12152,7 @@ namespace far
 					template <isIterable T>
 						auto toContiguousArray(const T &source)
 						{
-							using coreType = std::decay_t<T>::value_type;
+							using coreType = typename std::decay_t<T>::value_type;
 							contiguousArray<coreType,1> result(source.size());
 							FAR_SIGNED_INDEX_TYPE index = result.getLB(1);
 							for (auto &item : source)
@@ -12174,7 +12209,7 @@ namespace far
 					template <template<int rank, bounds_check_state bc> class index_type, isIterable T, bool contiguous=false>
 						auto toIndexedArray(const T &source)
 						{
-							using coreType = std::decay_t<T>::value_type;
+							using coreType = typename std::decay_t<T>::value_type;
 							Array<coreType,1,bc_default,index_type,contiguous> result(source.size());
 							FAR_SIGNED_INDEX_TYPE index = result.getLB(1);
 							for (auto &item : source)
@@ -12207,7 +12242,7 @@ namespace far
 
 					template<typename T, bool copy_in = true, bool copy_out = true>
 						class contiguous{
-							using core_type = arrayInfo<T>::type;
+							using core_type = typename arrayInfo<T>::type;
 							constexpr static int rank =  arrayInfo<T>::rank;
 							constexpr static bounds_check_state bc = arrayInfo<T>::bounds_check;
 							using stripped_type = std::invoke_result_t<decltype(std::decay_t<T>:: template buildVariant<core_type,rank,bc,false>)>;
@@ -12612,7 +12647,7 @@ namespace far
 
 					template<typename T, typename T_src>
 						auto lazy_cast(T_src&& src){
-							auto l = [](arrayInfo<T_src>::type const &op) -> decltype(auto)
+							auto l = [](typename arrayInfo<T_src>::type const &op) -> decltype(auto)
 							{  return static_cast<T>(op); };
 							return makeLazy<l>(std::forward<T_src>(src));
 						}

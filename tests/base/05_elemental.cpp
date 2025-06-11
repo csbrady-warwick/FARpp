@@ -5,8 +5,8 @@ using namespace far;
 
 template<elementalParameter<int,float,double> T1, elementalParameter<int,float,double> T2>
 decltype(auto) testElementalLazy(T1 &&a, T2 &&b){
-    using iT1 = arrayInfo<T1>::type;
-    using iT2 = arrayInfo<T2>::type;
+    using iT1 = typename arrayInfo<T1>::type;
+    using iT2 = typename arrayInfo<T2>::type;
     auto l = [](iT1 &a, const iT2 &b){
         return a+b;
     };

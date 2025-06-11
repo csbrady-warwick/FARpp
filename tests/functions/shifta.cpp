@@ -5,6 +5,7 @@ using namespace far;
 
 int main(){
     std::cout << "Testing shifta\n";
+#if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
     if (shifta(uint8_t(0b10010001),3) != uint8_t(0b11110010)) {
         std::cout << "Unsigned scalar shift with leading 1 failed\n";
         return -1;
@@ -33,7 +34,7 @@ int main(){
         std::cout << "Unsigned array shift with leading 1 failed\n";
         return -1;
     }
-    
+    #endif
 
     std::cout << "All tests passed\n\n";
 }

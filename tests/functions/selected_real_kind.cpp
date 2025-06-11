@@ -26,6 +26,7 @@ int main(){
         std::cout << "Error: selected_real_kind<6,70> != double\n";
         return -1;
     }
+#if !(defined(__clang__) && defined(__apple_build_version__))
     if ( std::numeric_limits<double>::digits10 != std::numeric_limits<long double>::digits10 ||
         std::numeric_limits<double>::max_exponent10 != std::numeric_limits<long double>::max_exponent10){
         std::cout << "Long double support detected. Testing\n";
@@ -46,6 +47,7 @@ int main(){
     } else {
         std::cout << "Long double is not distinct from double. Skipping long double tests\n";
     }
+#endif
 
     std::cout << "Test passed\n\n";
 }

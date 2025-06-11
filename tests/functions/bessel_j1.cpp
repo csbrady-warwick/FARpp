@@ -10,6 +10,7 @@ using namespace far;
 
 int main(){
 	std::cout << "Testing bessel_j1\n";
+#if !defined(FAR_NEED_BOOST_MATHS) || defined(FAR_HAS_BOOST_MATHS)
   Array<double,2> A(NX,NY), B;
 	A=1.0;
 	B=bessel_j1(A);
@@ -27,5 +28,6 @@ int main(){
 				return -1;
 			}
 		}
+#endif
 	std::cout << "Tests passed\n\n";
 }
