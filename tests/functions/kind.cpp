@@ -7,8 +7,8 @@ class demo{
 
 };
 
-int main(){
-    std::cout << "Testing kind function\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing kind function " << argv[0] << "\n";
     {
         Array<int,2> Arr;
         if (!std::is_same_v<kind<decltype(Arr)>, int>){

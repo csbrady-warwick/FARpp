@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing digits\n";
+	std::cout << "Testing digits " << argv[0] << "\n";
 	if (digits(int64_t(0)) != 63) {
 		std::cout << "Int64 digits failure\n";
 		return -1;

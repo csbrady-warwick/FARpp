@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing shape\n";
+    std::cout << "Testing shape " << argv[0] << "\n";
 
     {
         if (shape(3).getSize() != 0){

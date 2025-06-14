@@ -3,12 +3,16 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing reshape with pad\n";
+    std::cout << "Testing reshape with pad " << argv[0] << "\n";
     
     Array<int,1> a = linspace(1,4,4);
+#ifndef FAR_USE_C_INDEX
     Array<int,2> b = {{1,2},{3,4},{5,5}};
+#else
+    Array<int,2> b = {{1,2,3},{4,5,5}};
+#endif
     if (any(reshape_with_pad(a,std::array<int,2>{2,3},5) != b)){
         std::cout << "Reshape with scalar pad failed\n";
         return -1;

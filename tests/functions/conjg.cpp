@@ -9,9 +9,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing conjg\n";
+	std::cout << "Testing conjg " << argv[0] << "\n";
 	Array<std::complex<double>,2> A(NX,NY);
 
 	if (softCompare(conjg(cmplx(1.0,2.0)),std::complex<double>(1.0,-2.0))) {

@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing shifta\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing shifta " << argv[0] << "\n";
 #if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
     if (shifta(uint8_t(0b10010001),3) != uint8_t(0b11110010)) {
         std::cout << "Unsigned scalar shift with leading 1 failed\n";

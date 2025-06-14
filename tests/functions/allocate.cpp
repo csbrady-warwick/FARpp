@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing allocate, deallocate and allocated\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing allocate, deallocate and allocated " << argv[0] << "\n";
   Array<int,2> A(NX,NY);
 	
 	if (!allocated(A)) {

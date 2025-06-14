@@ -77,9 +77,9 @@ bool testBool(size_t N=NL){
 
 }
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing operators\n";
+    std::cout << "Testing operators " << argv[0] << "\n";
 
     if (!testMaths<int>()){
         std::cout << "Error in mathematical operator test\n";

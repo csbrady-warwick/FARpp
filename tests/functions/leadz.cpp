@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing leadz\n";
+	std::cout << "Testing leadz " << argv[0] << "\n";
 	if (leadz(uint8_t(0b00001111))!=4){
 		std::cout << "Scalar failure. Some leading zeros\n";
 		return -1;

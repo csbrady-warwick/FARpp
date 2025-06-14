@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing len_trim\n";
+	std::cout << "Testing len_trim " << argv[0] << "\n";
 	{
 		char test[10] = "ABC      ";
 		if (len_trim<int>(test)!=3){

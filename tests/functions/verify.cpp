@@ -4,8 +4,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing verify\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing verify " << argv[0] << "\n";
 
     if (verify("Hello","Hello")!=0){
         std::cout << "Error: verify(\"Hello\",\"Hello\")!=0\n";

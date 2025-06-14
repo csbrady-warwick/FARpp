@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing exponent\n";
+	std::cout << "Testing exponent " << argv[0] << "\n";
 	if (exponent(double(127)) != 7) {
 		std::cout << "Exponent double failure\n";
 		return -1;

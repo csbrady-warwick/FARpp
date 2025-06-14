@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing iany with partial reduction\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing iany with partial reduction " << argv[0] << "\n";
 	Array<uint16_t,2> A(NX,NY);
 
 	A(1,Range())=0b01010101;

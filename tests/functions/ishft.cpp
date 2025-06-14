@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing ishft\n";
+    std::cout << "Testing ishft " << argv[0] << "\n";
     if (ishft(0b00001111,2)!=0b00111100){
         std::cout << "ishft scalar left shift failure\n";
         return -1;

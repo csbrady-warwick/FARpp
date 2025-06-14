@@ -6,8 +6,8 @@
 
 using namespace far;
 
-int main() {
-    std::cout << "Testing iand" << std::endl;
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing iand " << argv[0] << "\n";
 
     if (iand(uint8_t(0b1010), uint8_t(0b1100)) != 0b1000) {
         std::cout << "Scalar test failed" << std::endl;

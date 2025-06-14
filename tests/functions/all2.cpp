@@ -7,9 +7,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing all with reduction along one rank\n";
+	std::cout << "Testing all with reduction along one rank " << argv[0] << "\n";
   Array<bool,2> A(NX,NY);
 	Array<bool,1> B;
 

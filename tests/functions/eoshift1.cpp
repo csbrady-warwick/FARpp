@@ -36,8 +36,8 @@ Array<int,2> shift(Array<int,2> &A, TU U, TV V, int boundary=0) {
 	return B;
 }
 
-int main(){
-	std::cout << "Testing eoshift\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing eoshift " << argv[0] << "\n";
 	Array<int,1> src(NX*NY);
 	Array<int,2> A(NX,NY), B(NX,NY), C;
 

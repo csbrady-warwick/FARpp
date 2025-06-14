@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing repeat\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing repeat " << argv[0] << "\n";
 
     if (repeat("Hello",3) != "HelloHelloHello") {
         std::cout << "repeat failed, char*\n";

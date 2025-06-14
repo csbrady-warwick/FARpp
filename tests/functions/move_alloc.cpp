@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
     
-        std::cout << "Testing move_alloc\n";
+        std::cout << "Testing move_alloc " << argv[0] << "\n";
     
         Array<int,1> a = literal(1,2,3,4);
         Array<int,1> c;

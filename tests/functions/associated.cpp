@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing associated\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing associated " << argv[0] << "\n";
   	Array<int,2> A(NX,NY), C(NX,NY);
 	Array<int,2> B;
 

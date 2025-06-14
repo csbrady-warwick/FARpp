@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing shiftl\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing shiftl " << argv[0] << "\n";
     if (shiftl(uint8_t(0b10010001),3) != uint8_t(0b10001000)) {
         std::cout << "Unsigned scalar shift failed\n";
         return -1;

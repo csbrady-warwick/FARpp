@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test for ibclr\n";
+    std::cout << "Test for ibclr " << argv[0] << "\n";
     if (ibclr(0b1111,1) != 0b1101){
         std::cout << "Scalar failure\n";
         return -1;

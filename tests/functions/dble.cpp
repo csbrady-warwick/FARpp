@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing dble\n";
+	std::cout << "Testing dble " << argv[0] << "\n";
 	Array<int,2> A(NX,NY);
 	Array<double,2> B(NX,NY);
 	Array<std::complex<double>,2> C(NX,NY);

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test for maskr\n";
+    std::cout << "Test for maskr " << argv[0] << "\n";
     if (maskr<uint8_t>(4) != 0b00001111){
         std::cout << "Scalar failure\n";
         return -1;

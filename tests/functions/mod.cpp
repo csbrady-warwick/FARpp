@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing mod\n";
+    std::cout << "Testing mod " << argv[0] << "\n";
 
     if (mod(5, 3)!=2){
         std::cout << "Error in mod(5, 3)\n";

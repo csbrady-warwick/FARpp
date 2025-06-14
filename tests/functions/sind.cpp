@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing sind\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing sind " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=90.0;
 	B=sind(A);

@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing bit_size\n";
+	std::cout << "Testing bit_size " << argv[0] << "\n";
 	if (bit_size(1) != sizeof(int) * CHAR_BIT) {
 		std::cout << "Int size failed";
 		return -1;

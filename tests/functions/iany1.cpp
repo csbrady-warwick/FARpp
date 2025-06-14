@@ -5,8 +5,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing iany with full reduction\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing iany with full reduction " << argv[0] << "\n";
 	Array<uint8_t,1> A(2);
 
 	A(1)=0b01010101;

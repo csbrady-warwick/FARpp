@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing scale\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing scale " << argv[0] << "\n";
 
     Array<double,1> val = ones(4);
     Array<int,1> scaleval = linspace(0,3,4);

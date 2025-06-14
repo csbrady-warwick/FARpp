@@ -6,10 +6,9 @@
 
 using namespace far;
 
-int main()
-{
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing findloc\n";
+	std::cout << "Testing findloc " << argv[0] << "\n";
 
   Array<int, 2> a(NX, NY);
   Array<int, 1> loc;
@@ -18,10 +17,17 @@ int main()
   a=0;
   mask=true;
   // Test for finding a single value in the correct location
+#ifndef FAR_USE_C_INDEX
   for (int j = NY; j >= 1; j--)
   {
     for (int i = NX; i >= 1 ; i--)
     {
+#else
+  for (int i = NX; i >= 1; i--)
+  {
+    for (int j = NY; j >= 1 ; j--)
+    {
+#endif
       a(i, j) = 8;
       {
         loc = findloc_with_mask(a, 8, mask);

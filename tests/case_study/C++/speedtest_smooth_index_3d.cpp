@@ -27,6 +27,7 @@ int main(){
 #pragma omp parallel
 	{
 		for (int its = 0; its<ITS;++its){
+#ifndef FAR_USE_C_INDEX
 			for (int k=1;k<=NZ;++k){
 				for (int j=1;j<=NY;++j){
 					#pragma omp for
@@ -38,9 +39,24 @@ int main(){
 						) /6.0;
 					}
 				}
+#else
+      for (int i=1;i<=NX;++i){
+        for (int j=1;j<=NY;++j){
+          #pragma omp for
+          for (int k=1;k<=NZ;++k){
+            data2(i,j,k) = (
+              data(i-1,j,k) + data(i+1,j,k)
+              + data(i,j-1,k) + data(i,j+1,k)
+              + data(i,j,k-1) + data(i,j,k+1)
+            ) /6.0;
+          }
+        }
+#endif
 			}
 			//Copy back
+      beginWorkshare();
 			data(Range(1,NX),Range(1,NY),Range(1,NZ))=data2(Range(1,NX),Range(1,NY),Range(1,NZ));
+      endWorkshare();
 #pragma omp barrier
 		}
 	}

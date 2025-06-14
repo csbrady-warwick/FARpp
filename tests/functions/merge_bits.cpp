@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing merge_bits\n";
+    std::cout << "Testing merge_bits " << argv[0] << "\n";
 
     if (merge_bits(uint8_t(0b11110000), uint8_t(0b00001111),uint8_t(0b11110000)) != 0b11111111) {
         std::cout << "scalar merge_bits test failed\n";

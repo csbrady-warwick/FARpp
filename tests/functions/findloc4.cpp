@@ -6,10 +6,9 @@
 
 using namespace far;
 
-int main()
-{
+int main([[maybe_unused]]int argc, char** argv){
 
-  std::cout << "Test findloc with mask\n";
+  std::cout << "Test findloc with mask " << argv[0] << "\n";
 
   Array<int, 2> a(NX, NY);
   Array<int, 1> loc;

@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing cosh\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing cosh " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=4.6;
 	B=cosh(A);

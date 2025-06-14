@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing iachar\n";
+	std::cout << "Testing iachar " << argv[0] << "\n";
 	Array<char,2> A(NX,NY);
 	Array<int,2> B;
 	A='c';

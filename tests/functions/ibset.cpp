@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test for ibset\n";
+    std::cout << "Test for ibset " << argv[0] << "\n";
     if (ibset(0,1) != 2){
         std::cout << "Scalar failure\n";
         return -1;

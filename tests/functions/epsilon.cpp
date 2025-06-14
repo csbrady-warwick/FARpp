@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing epsilon\n";
+	std::cout << "Testing epsilon " << argv[0] << "\n";
 	if (epsilon(double(0)) != std::numeric_limits<double>::epsilon) {
 		std::cout << "Scalar failure\n";
 		return -1;

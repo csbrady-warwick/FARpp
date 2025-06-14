@@ -4,8 +4,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing rrspacing\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing rrspacing " << argv[0] << "\n";
     if (softCompare(rrspacing(-3.0),6755399441055744.0)){
         std::cout << "rrspacing(-3.0) failed\n";
         return -1;

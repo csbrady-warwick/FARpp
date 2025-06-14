@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing popcount function\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing popcount function " << argv[0] << "\n";
 
     Array<uint8_t,1> A = linspace<uint8_t>(0,255,256);
     auto B = toArray(popcnt(A));

@@ -101,6 +101,8 @@
 
 #ifndef FAR_DEFAULT_INDEX_BUILDER
 	#if defined(FAR_CSTYLE) || defined(FAR_USE_C_INDEX)
+    #undef FAR_USE_C_INDEX
+    #define FAR_USE_C_INDEX
 		#define FAR_DEFAULT_INDEX_BUILDER CIndexBuilder
 	#else
 		#define FAR_DEFAULT_INDEX_BUILDER FortranIndexBuilder
@@ -109,6 +111,8 @@
 
 #ifndef FAR_DEFAULT_LB
 	#if defined(FAR_CSTYLE) || defined(FAR_USE_C_BOUNDARY)
+    #undef FAR_USE_C_BOUNDARY
+    #define FAR_USE_C_BOUNDARY
 		#define FAR_DEFAULT_LB 0
 	#else
 		#define FAR_DEFAULT_LB 1
@@ -2614,7 +2618,7 @@ namespace far
 								UB=getUB(rlevel+1);
 							}
 							sz = getRankSize(rlevel+1);
-							FAR_SIGNED_INDEX_TYPE &val = std::get<level>(index);
+							FAR_SIGNED_INDEX_TYPE &val = std::get<rlevel>(index);
 							val+=shift*direction;
 							//Deal with val > UB
 							FAR_SIGNED_INDEX_TYPE diff;
@@ -4682,7 +4686,11 @@ namespace far
 						template <typename T_other, std::enable_if_t<rank==2 && std::is_convertible<T_other,valueType>::value, int> = 0>
 							Array(std::initializer_list<std::initializer_list<T_other>> other) : rdata(nullptr), bdata(nullptr), shouldDelete(false){
 								OMPInit();
-								index = index_type(other.begin()->size(),other.size());
+								if constexpr(index_type::core_order==0) {
+									index = index_type(other.begin()->size(),other.size());
+								} else {
+                  index = index_type(other.size(), other.begin()->size());
+								}
 								allocate_core();
 								FAR_UNSIGNED_INDEX_TYPE i=0;
 								for (auto &row : other){
@@ -4699,7 +4707,11 @@ namespace far
 						template <typename T_other, std::enable_if_t<rank==3 && std::is_convertible<T_other,valueType>::value, int> = 0>
 							Array(std::initializer_list<std::initializer_list<std::initializer_list<T_other>>> other) : rdata(nullptr), bdata(nullptr), shouldDelete(false){
 								OMPInit();
-								index = index_type(other.begin()->begin()->size(), other.begin()->size(), other.size());
+                if constexpr(index_type::core_order==0) {
+									index = index_type(other.begin()->begin()->size(), other.begin()->size(), other.size());
+								} else {
+                  index = index_type(other.size(), other.begin()->size(), other.begin()->begin()->size());
+								}
 								allocate_core();
 								FAR_UNSIGNED_INDEX_TYPE i=0;
 								for (auto &plane : other){
@@ -5239,7 +5251,11 @@ namespace far
 						template <typename T_other, std::enable_if_t<rank==2 && std::is_convertible<T_other,valueType>::value, int> = 0>
 							Array &operator=(std::initializer_list<std::initializer_list<T_other>> other){
 								if (getSize()!=other.size()*other.begin()->size()){
-									index = index_type(other.begin()->size(),other.size());
+		              if constexpr(index_type::core_order==0) {
+     	             index = index_type(other.begin()->size(),other.size());
+      	          } else {
+        	          index = index_type(other.size(), other.begin()->size());
+          	      }
 									free_core();
 									allocate_core();
 								}
@@ -5260,7 +5276,11 @@ namespace far
 						template <typename T_other, std::enable_if_t<rank==3 && std::is_convertible<T_other,valueType>::value, int> = 0>
 							Array &operator=(std::initializer_list<std::initializer_list<std::initializer_list<T_other>>> other){
 								if (getSize()!=other.size()*other.begin()->size()*other.begin()->begin()->size()){
-									index = index_type(other.begin()->begin()->size(), other.begin()->size(), other.size());
+	                if constexpr(index_type::core_order==0) {
+  	                index = index_type(other.begin()->begin()->size(), other.begin()->size(), other.size());
+    	            } else {
+      	            index = index_type(other.size(), other.begin()->size(), other.begin()->begin()->size());
+        	        }
 									free_core();
 									allocate_core();
 								}
@@ -6354,7 +6374,7 @@ namespace far
 					 * Fortran BESSEL_J0(https://fortranwiki.org/fortran/show/bessel_j0)
 					 */
 					template <typename T>
-						auto bessel_j0(T &&x)
+						auto bessel_j0([[maybe_unused]] T &&x)
 						{
 					    static_assert(std::is_same<T, void>::value,
 								"Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6364,7 +6384,7 @@ namespace far
 					 * Fortran BESSEL_J1(https://fortranwiki.org/fortran/show/bessel_j1)
 					 */
 					template <typename T>
-						auto bessel_j1(T &&x)
+						auto bessel_j1([[maybe_unused]] T &&x)
 						{
               static_assert(std::is_same<T, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6374,7 +6394,7 @@ namespace far
 					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
 					 */
 					template <typename T1, typename T2>
-						auto bessel_jn(T1 &&n, T2 &&x)
+						auto bessel_jn([[maybe_unused]] T1 &&n, [[maybe_unused]] T2 &&x)
 						{
               static_assert(std::is_same<T1, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6384,7 +6404,7 @@ namespace far
 					 * Fortran BESSEL_JN(https://fortranwiki.org/fortran/show/bessel_jn)
 					 */
 					template <typename T1, typename T2, typename T3>
-						auto bessel_jn(T1 &&n1, T2 &&n2, T3 &&x)
+						auto bessel_jn([[maybe_unused]] T1 &&n1, [[maybe_unused]] T2 &&n2, [[maybe_unused]] T3 &&x)
 						{
               static_assert(std::is_same<T1, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6394,7 +6414,7 @@ namespace far
 					 * Fortran BESSEL_Y0(https://fortranwiki.org/fortran/show/bessel_y0)
 					 */
 					template <typename T>
-						auto bessel_y0(T &&x)
+						auto bessel_y0([[maybe_unused]] T &&x)
 						{
               static_assert(std::is_same<T, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6404,7 +6424,7 @@ namespace far
 					 * Fortran BESSEL_Y1(https://fortranwiki.org/fortran/show/bessel_y1)
 					 */
 					template <typename T>
-						auto bessel_y1(T &&x)
+						auto bessel_y1([[maybe_unused]] T &&x)
 						{
               static_assert(std::is_same<T, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6414,7 +6434,7 @@ namespace far
 					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_yn)
 					 */
 					template <typename T1, typename T2>
-						auto bessel_yn(T1 &&n, T2 &&x)
+						auto bessel_yn([[maybe_unused]] T1 &&n, [[maybe_unused]] T2 &&x)
 						{
               static_assert(std::is_same<T1, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6424,7 +6444,7 @@ namespace far
 					 * Fortran BESSEL_YN(https://fortranwiki.org/fortran/show/bessel_jn)
 					 */
 					template <typename T1, typename T2, typename T3>
-						auto bessel_yn(T1 &&n1, T2 &&n2, T3 &&x)
+						auto bessel_yn([[maybe_unused]] T1 &&n1, [[maybe_unused]] T2 &&n2, [[maybe_unused]] T3 &&x)
 						{
               static_assert(std::is_same<T1, void>::value,
                 "Please use a compiler with either ISO/IEC 29124:2010 support or make Boost available when compiling");
@@ -6435,17 +6455,17 @@ namespace far
 					 * Fortran BGE(https://fortranwiki.org/fortran/show/bge)
 					 */
 					template <typename T1, typename T2>
-						auto bge(T1 &&i, T2 &&j)
+						auto bge([[maybe_unused]] T1 &&i, [[maybe_unused]] T2 &&j)
 						{
               AERRCHECKINTEGER(T1,"bge","i")
               AERRCHECKINTEGER(T2,"bge","j")
-              using At1 = typename arrayInfo<T1>::type;
-              using At2 = typename arrayInfo<T2>::type;
 #if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
 						static_assert(std::is_same<T1, void>::value,
 			        "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
 						return true;
 #else
+              using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
@@ -6458,17 +6478,17 @@ namespace far
 					 * Fortran BGT(https://fortranwiki.org/fortran/show/bgt)
 					 */
 					template <typename T1, typename T2>
-						auto bgt(T1 &&i, T2 &&j)
+						auto bgt([[maybe_unused]] T1 &&i, [[maybe_unused]] T2 &&j)
 						{
               AERRCHECKINTEGER(T1,"bgt","i")
-                AERRCHECKINTEGER(T2,"bgt","j")
-                using At1 = typename arrayInfo<T1>::type;
-              using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T2,"bgt","j")
 #if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
             static_assert(std::is_same<T1, void>::value,
               "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
 						return true;
 #else
+              using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
@@ -6488,17 +6508,17 @@ namespace far
 					 * Fortran BLE(https://fortranwiki.org/fortran/show/ble)
 					 */
 					template <typename T1, typename T2>
-						auto ble(T1 &&i, T2 &&j)
+						auto ble([[maybe_unused]] T1 &&i, [[maybe_unused]] T2 &&j)
 						{
               AERRCHECKINTEGER(T1,"ble","i")
-                AERRCHECKINTEGER(T2,"ble","j")
-                using At1 = typename arrayInfo<T1>::type;
-              using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T2,"ble","j")
 #if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
             static_assert(std::is_same<T1, void>::value,
               "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
             return true;
 #else
+              using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
@@ -6511,17 +6531,17 @@ namespace far
 					 * Fortran BLT(https://fortranwiki.org/fortran/show/blt)
 					 */
 					template <typename T1, typename T2>
-						auto blt(T1 &&i, T2 &&j)
+						auto blt([[maybe_unused]] T1 &&i, [[maybe_unused]] T2 &&j)
 						{
               AERRCHECKINTEGER(T1,"blt","i")
-                AERRCHECKINTEGER(T2,"blt","j")
-                using At1 = typename arrayInfo<T1>::type;
-              using At2 = typename arrayInfo<T2>::type;
+              AERRCHECKINTEGER(T2,"blt","j")
 #if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
             static_assert(std::is_same<T1, void>::value,
               "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
             return true;
 #else
+              using At1 = typename arrayInfo<T1>::type;
+              using At2 = typename arrayInfo<T2>::type;
 							using Unsigned1 = typename std::make_unsigned<typename arrayInfo<T1>::type>::type;
 							using Unsigned2 = typename std::make_unsigned<typename arrayInfo<T2>::type>::type;
 							//Lambda for comparison
@@ -10520,6 +10540,35 @@ namespace far
 							return result;
 						}
 
+					namespace{
+
+						/**
+						* Advance a tuple element by element using a runtime specified order
+						*/
+						template<int level, int rank, typename T_order>
+            bool advanceTupleWithOrder(typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,rank>::type &tuple, const FAR_SIGNED_INDEX_TYPE sizes[rank], const T_order& order){
+              auto getOrder = [&order](int i){
+                if constexpr(arrayInfo<T_order>::value){
+                  return order.getItem(i)-1;
+                } else {
+                  return order[i]-1;
+                }
+              };
+								FAR_SIGNED_INDEX_TYPE &index = getTupleLevel(tuple,getOrder(level));
+                index++;
+								if (index-defaultLB >= sizes[getOrder(level)]){
+                  if constexpr(level < rank - 1) {
+										index=defaultLB;
+										return advanceTupleWithOrder<level+1,rank>(tuple, sizes, order);
+									} else {
+										return true;
+									}
+								}
+							return false;
+						}
+
+					};
+
 					/**
 					 * Fortran RESHAPE(https://fortranwiki.org/fortran/show/reshape)
 					 * with order
@@ -10527,37 +10576,24 @@ namespace far
 					template<typename T_src, typename T_kind, FAR_UNSIGNED_INDEX_TYPE size, typename T_order>
 						auto reshape_with_order(T_src &&source,std::array<T_kind,size> sizes, T_order &&order)
 						{
-							constexpr static int rank = size;
-							using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,size>)>;
-							FAR_UNSIGNED_INDEX_TYPE orderedSizes[rank];
-							auto getOrder = [&order](int i){
-								if constexpr(arrayInfo<T_order>::value){
-									return order.getItem(i)-1;
-								} else {
-									return order[i]-1;
-								}
-							};
-							for (int i=0;i<rank;++i){
-								orderedSizes[i] = sizes[getOrder(i)];
-							}
-							typename atype::index_type it(orderedSizes); // Create an indexer with the indices in incrementing order so that I can get and advance the indices
-							typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,rank>::type otuple, dtuple;
-							bool finished=false;
+							constexpr static int destRank = size;
+							using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,destRank>)>;
 							atype result;
+							FAR_SIGNED_INDEX_TYPE destSize[destRank];
+							for (int i=0;i<destRank;++i) destSize[i] = sizes[i];
 							result.allocate(sizes);
 							if (result.getSize() > source.getSize())
 								throw std::out_of_range("Unable to reshape array - number of elements after reshape larger than number of elements before reshape");
-							for (int i=0;i<rank;++i) getTupleLevel(otuple,i) = defaultLB;
-							auto sit = source.begin();
+							typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,destRank>::type destTuple;
+              for (int i=0;i<destRank;++i) { 
+                getTupleLevel(destTuple,i) = defaultLB;
+              }
+							bool finished=false;
+							auto it = source.begin();
 							while(!finished){
-								//Descramble the index tuple back into the real array
-								for (int i=0;i<rank;++i){
-									getTupleLevel(dtuple,getOrder(i)) = getTupleLevel(otuple,i);
-								}
-								//Copy the data across
-								callDefaultBase(result,dtuple) = *sit++;
-								//Move the simple incrementing tuple
-								finished = it.advanceTuple(otuple);
+					      std::apply([&result](auto &&...args) -> decltype(auto)
+				          {  return result.defaultBase(args...); }, destTuple) = *it++;
+									finished = advanceTupleWithOrder<0,destRank>(destTuple, destSize, order);
 							}
 							return result;
 						}
@@ -10569,43 +10605,31 @@ namespace far
 					template<typename T_src, typename T_kind, FAR_UNSIGNED_INDEX_TYPE size, typename T_order, typename T_pad, std::enable_if_t<arrayInfo<T_pad>::value || isStdArray<std::decay_t<T_pad>>::value,int>* =nullptr>
 						auto reshape_with_order_and_pad(T_src &&source,std::array<T_kind,size> sizes, T_order &&order, T_pad &&pad)
 						{
-							constexpr static int rank = size;
-							using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,size>)>;
-							FAR_UNSIGNED_INDEX_TYPE orderedSizes[rank];
-							auto getOrder = [&order](int i){
-								if constexpr(arrayInfo<T_order>::value){
-									return order.getItem(i)-1;
-								} else {
-									return order[i]-1;
-								}
-							};
-							for (int i=0;i<rank;++i){
-								orderedSizes[i] = sizes[getOrder(i)];
-							}
-							typename atype::index_type it(orderedSizes);
-							typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,rank>::type otuple, dtuple;
-							bool finished=false;
-							atype result;
-							result.allocate(sizes);
-							for (int i=0;i<rank;++i) getTupleLevel(otuple,i) = defaultLB;
-							auto sit = source.begin();
-							auto site = source.end();
-							auto pst = pad.begin();
+              constexpr static int destRank = size;
+              using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,destRank>)>;
+              atype result;
+              FAR_SIGNED_INDEX_TYPE destSize[destRank];
+              for (int i=0;i<destRank;++i) destSize[i] = sizes[i];
+              result.allocate(sizes);
+              typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,destRank>::type destTuple;
+              for (int i=0;i<destRank;++i) {
+                getTupleLevel(destTuple,i) = defaultLB;
+              }
+              bool finished=false;
+              auto it = source.begin();
 							auto pit = pad.begin();
-							auto pte = pad.end();
-							while(!finished){
-								for (int i=0;i<rank;++i){
-									getTupleLevel(dtuple,getOrder(i)) = getTupleLevel(otuple,i);
-								}
-								if (sit<site){
-									callDefaultBase(result,dtuple) = *sit++;
+              while(!finished){
+								if (it!=source.end()) {
+	            	  std::apply([&result](auto &&...args) -> decltype(auto)
+  	            	  {  return result.defaultBase(args...); }, destTuple) = *it++;
 								} else {
-									callDefaultBase(result,dtuple) = *pit++;
+                  std::apply([&result](auto &&...args) -> decltype(auto) 
+                    {  return result.defaultBase(args...); }, destTuple) = *pit++;
+									if (pit == pad.end()) pit = pad.begin();
 								}
-								if (pit==pte) pit=pst;
-								finished = it.advanceTuple(otuple);
-							}
-							return result;
+								finished = advanceTupleWithOrder<0,destRank>(destTuple, destSize, order);
+              }
+              return result;
 						}
 
 					/**
@@ -10615,39 +10639,29 @@ namespace far
 					template<typename T_src, typename T_kind, FAR_UNSIGNED_INDEX_TYPE size, typename T_order, typename T_pad, std::enable_if_t<!arrayInfo<T_pad>::value & !isStdArray<std::decay_t<T_pad>>::value,int>* =nullptr>
 						auto reshape_with_order_and_pad(T_src &&source,std::array<T_kind,size> sizes, T_order &&order, T_pad &&pad)
 						{
-							constexpr static int rank = size;
-							using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,size>)>;
-							FAR_UNSIGNED_INDEX_TYPE orderedSizes[rank];
-							auto getOrder = [&order](int i){
-								if constexpr(arrayInfo<T_order>::value){
-									return order.getItem(i)-1;
-								} else {
-									return order[i]-1;
-								}
-							};
-							for (int i=0;i<rank;++i){
-								orderedSizes[i] = sizes[getOrder(i)];
-							}
-							typename atype::index_type it(orderedSizes);
-							typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,rank>::type otuple, dtuple;
-							bool finished=false;
-							atype result;
-							result.allocate(sizes);
-							for (int i=0;i<rank;++i) getTupleLevel(otuple,i) = defaultLB;
-							auto sit = source.begin();
-							auto site = source.end();
-							while(!finished){
-								for (int i=0;i<rank;++i){
-									getTupleLevel(dtuple,getOrder(i)) = getTupleLevel(otuple,i);
-								}
-								if (sit<site){
-									callDefaultBase(result,dtuple) = *sit++;
-								} else {
-									callDefaultBase(result,dtuple) = pad;
-								}
-								finished = it.advanceTuple(otuple);
-							}
-							return result;
+              constexpr static int destRank = size;
+              using atype = std::invoke_result_t<decltype(std::decay_t<T_src>::template buildVariant<typename arrayInfo<T_src>::type,destRank>)>;
+              atype result;
+              FAR_SIGNED_INDEX_TYPE destSize[destRank];
+              for (int i=0;i<destRank;++i) destSize[i] = sizes[i];
+              result.allocate(sizes);
+              typename N_ary_tuple_type<FAR_SIGNED_INDEX_TYPE,destRank>::type destTuple;
+              for (int i=0;i<destRank;++i) {
+                getTupleLevel(destTuple,i) = defaultLB;
+              }
+              bool finished=false;
+              auto it = source.begin();
+              while(!finished){
+                if (it!=source.end()) {
+                  std::apply([&result](auto &&...args) -> decltype(auto) 
+                    {  return result.defaultBase(args...); }, destTuple) = *it++;
+                } else {
+                  std::apply([&result](auto &&...args) -> decltype(auto)
+                    {  return result.defaultBase(args...); }, destTuple) = pad;
+                }
+                finished = advanceTupleWithOrder<0,destRank>(destTuple, destSize, order);
+              }
+              return result;
 						}
 
 					/**
@@ -10875,17 +10889,17 @@ namespace far
 					 * Fortran SHIFTA(https://fortranwiki.org/fortran/show/shifta)
 					 */
 					template <typename T_i, typename T_shift>
-						auto shifta(T_i &&i, T_shift &&shift)
+						auto shifta([[maybe_unused]] T_i &&i, [[maybe_unused]] T_shift &&shift)
 						{
               AERRCHECKINTEGER(T_i,"shifta","i");
               AERRCHECKINTEGER(T_shift,"shifta","shift");
               using type = typename arrayInfo<T_i>::type;
-              using shiftType = typename arrayInfo<T_shift>::type;
 #if !(defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L)
             static_assert(std::is_same<T_i, void>::value,
               "Your compiler doesn't support std::bit_cast. You cannot use bitwise operations");
             return type();
 #else
+              using shiftType = typename arrayInfo<T_shift>::type;
 							//Algebraic shift for both signed and unsigned integers
 							auto l =[](type const &i, shiftType const &shift) -> decltype(auto)
 							{
@@ -12389,6 +12403,36 @@ namespace far
 							return space;
 						}
 
+          /**
+           * Create a 1D array of items spanning a range with a Fortran order tag
+           */
+          template <typename T = double, bounds_check_state bounds = bc_default>
+            FortranArray<T, 1, bounds> FortranLinspace(T min, T max, FAR_SIGNED_INDEX_TYPE N)
+            {
+              FortranArray<T, 1, bounds> space(N);
+              double delta = (max - min) / double(N - 1);
+              for (FAR_SIGNED_INDEX_TYPE i = defaultLB; i < defaultLB+N; ++i)
+              {
+                space(i) = delta * double(i-defaultLB) + min;
+              }
+              return space;
+            }
+
+          /**
+           * Create a 1D array of items spanning a range with a C order tag
+           */
+          template <typename T = double, bounds_check_state bounds = bc_default>
+            CArray<T, 1, bounds> CLinspace(T min, T max, FAR_SIGNED_INDEX_TYPE N)
+            {
+              CArray<T, 1, bounds> space(N);
+              double delta = (max - min) / double(N - 1);
+              for (FAR_SIGNED_INDEX_TYPE i = defaultLB; i < defaultLB+N; ++i)
+              {
+                space(i) = delta * double(i-defaultLB) + min;
+              }
+              return space;
+            }
+
 					/**
 					 * Create a log spaced array of items spanning a range
 					 */
@@ -12403,6 +12447,36 @@ namespace far
 							}
 							return space;
 						}
+
+          /**
+           * Create a log spaced array of items spanning a range with a Fortran ordered result
+           */
+          template <typename T = double, bounds_check_state bounds = bc_default>
+            FortranArray<T, 1, bounds> FortranLogspace(T min, T max, FAR_SIGNED_INDEX_TYPE N)
+            {
+              FortranArray<T, 1, bounds> space(N);
+              double delta = (std::log10(max) - std::log10(min)) / double(N - 1);
+              for (FAR_SIGNED_INDEX_TYPE i = defaultLB; i < defaultLB+N; ++i)
+              {
+                space(i) = std::pow(10.0, delta * double(i-defaultLB) + std::log10(min));
+              }
+              return space;
+            }
+
+          /**
+           * Create a log spaced array of items spanning a range with a C ordered result
+           */
+          template <typename T = double, bounds_check_state bounds = bc_default>
+            CArray<T, 1, bounds> Clogspace(T min, T max, FAR_SIGNED_INDEX_TYPE N)
+            {
+              CArray<T, 1, bounds> space(N);
+              double delta = (std::log10(max) - std::log10(min)) / double(N - 1);
+              for (FAR_SIGNED_INDEX_TYPE i = defaultLB; i < defaultLB+N; ++i)
+              {
+                space(i) = std::pow(10.0, delta * double(i-defaultLB) + std::log10(min));
+              }
+              return space;
+            }
 
 					inline auto& fortFile(int n) {
 						static std::map<int, std::fstream> streamMap;
@@ -12638,6 +12712,138 @@ namespace far
 							fillArray(array, defaultLB, item, others...);
 							return array;
 						}
+
+            /**
+            * Construct a literal from initializer lists. Here for rank1 arrays
+            */
+            template <typename T_array_in = void, typename T_other>
+              auto rowLiteral(std::initializer_list<T_other> other){
+                using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+                Array<T_array, 1> result(other.size());
+                FAR_UNSIGNED_INDEX_TYPE index=defaultLB;
+                for (auto &val : other){
+                	result.defaultBase(index) = val;
+                  ++index;
+								}
+	  						return result;
+              }
+
+            /**
+            * Construct a literal from initializer lists. Here for rank1 arrays
+            */
+            template <typename T_array_in = void, typename T_other>
+              auto columnLiteral(std::initializer_list<T_other> other){
+                using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+                Array<T_array, 1> result(other.size());
+                FAR_UNSIGNED_INDEX_TYPE index=defaultLB;
+                for (auto &val : other){
+                  result.defaultBase(index) = val;
+                  ++index;
+                }
+                return result;
+              }
+
+            /**
+            * Construct a literal from initializer lists. Here for rank2 arrays
+            */
+            template <typename T_array_in = void, typename T_other>
+              auto rowLiteral(std::initializer_list<std::initializer_list<T_other>> other){
+                using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+                Array<T_array, 2> result( other.size(), other.begin()->size());
+                FAR_UNSIGNED_INDEX_TYPE index[2]={defaultLB, defaultLB};
+                for (auto &row : other){
+                  for (auto &val : row){
+                    result.defaultBase(index[0],index[1]) = val;
+                    ++index[1];
+                  }
+									index[1] = defaultLB;
+                  ++index[0];
+                }
+                return result;
+              }
+
+            /**
+            * Construct a literal from initializer lists. Here for rank2 arrays
+            */
+            template <typename T_array_in = void, typename T_other>
+              auto columnLiteral(std::initializer_list<std::initializer_list<T_other>> other){
+                using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+                Array<T_array, 2> result( other.begin()->size(), other.size());
+                FAR_UNSIGNED_INDEX_TYPE index[2]={defaultLB, defaultLB};
+                for (auto &col : other){
+                  for (auto &val : col){
+                    result.defaultBase(index[0],index[1]) = val;
+                    ++index[0];
+                  }
+                  index[0] = defaultLB;
+                  ++index[1];
+                }
+                return result;
+              }
+
+						/**
+						* Construct a literal from initializer lists. Here for rank3 arrays
+						* Arrays are constructed outwards, so rows, columns, planes etc.
+						*/
+            template <typename T_array_in = void, typename T_other>
+              auto rowLiteral(std::initializer_list<std::initializer_list<std::initializer_list<T_other>>> other){
+								using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+								Array<T_array, 3> result(other.size(), other.begin()->size(), other.begin()->begin()->size());
+								FAR_UNSIGNED_INDEX_TYPE index[3]={defaultLB, defaultLB, defaultLB};
+                for (auto &plane : other){
+                  for (auto &row : plane){
+                    for (auto &val : row){
+                      result.defaultBase(index[0],index[1],index[2]) = val;
+											++index[2];
+                    }
+										index[2]=defaultLB;
+  									++index[1];
+                  }
+									index[1]=defaultLB;
+	  							++index[0];
+                }
+                return result;
+              }
+
+            /**
+            * Construct a literal from initializer lists. Here for rank3 arrays
+            * Arrays are constructed outwards, so rows, columns, planes etc.
+            */
+            template <typename T_array_in = void, typename T_other>
+              auto columnLiteral(std::initializer_list<std::initializer_list<std::initializer_list<T_other>>> other){
+                using T_array = std::conditional_t<std::is_void_v<T_array_in>,T_other,T_array_in>;
+                Array<T_array, 3> result(other.begin()->begin()->size(), other.begin()->size(), other.size());
+                FAR_UNSIGNED_INDEX_TYPE index[3]={defaultLB, defaultLB, defaultLB};
+                for (auto &plane : other){
+                  for (auto &row : plane){
+                    for (auto &val : row){
+                      result.defaultBase(index[0],index[1],index[2]) = val;
+                      ++index[0];
+                    }
+                    index[0]=defaultLB;
+                    ++index[1];
+                  }
+                  index[1]=defaultLB;
+                  ++index[2];
+                }
+                return result;
+              }
+
+          //Construct a literal array from a comma separated list of values
+          template<typename T_item, typename... T_others>
+            auto FortranLiteral(T_item &&item, T_others&&... others){
+              FortranArray<typename arrayInfo<T_item>::type,1> array(sizeList(item,others...));
+              fillArray(array, defaultLB, item, others...);
+              return array;
+            }
+
+          //Construct a literal array from a comma separated list of values
+          template<typename T_item, typename... T_others>
+            auto CLiteral(T_item &&item, T_others&&... others){
+              CArray<typename arrayInfo<T_item>::type,1> array(sizeList(item,others...));
+              fillArray(array, defaultLB, item, others...);
+              return array;
+            }
 
 					template<typename T_first, typename... T_values>
 						auto constLiteral(T_first &&first, T_values&&... values){

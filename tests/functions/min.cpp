@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing min function\n";
+    std::cout << "Testing min function " << argv[0] << "\n";
 
     if (min(2,3) != 2) {
         std::cout << "Error 2 parameter integer min \n";

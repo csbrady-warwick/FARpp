@@ -7,9 +7,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing fraction\n";
+	std::cout << "Testing fraction " << argv[0] << "\n";
 	if (softCompare(fraction(double(128)),0.5)) {
 		std::cout << "Fraction double failure\n";
 		return -1;

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing ones\n";
+    std::cout << "Testing ones " << argv[0] << "\n";
 
     Array<int,1> A = ones<int>(10);
     if (A.getSize()!=10){

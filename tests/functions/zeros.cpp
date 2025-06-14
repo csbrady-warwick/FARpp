@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing zeros\n";
+    std::cout << "Testing zeros " << argv[0] << "\n";
 
     Array<int,1> A = zeros<int>(10);
     if (A.getSize()!=10){

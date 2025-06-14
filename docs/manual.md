@@ -271,7 +271,7 @@ int main(){
 
 ```
 
-This could be extended to higher ranks but the syntax's usability rapidly reduces, so at present it is restricted to rank 3 or lower.
+This could be extended to higher ranks but the syntax's usability rapidly reduces, so at present it is restricted to rank 3 or lower. The initialization is in the order of the underlying memory, so {{1,2,3},{4,5,6}} is a 3x2 array for Fortran ordered arrays, and a 2x3 array for C ordered arrays. The equivalent C array is {{1,4},{2,5},{3,6}}.
 
 Sometimes you don't want to initialise an array with values from another source, but you want to take the size information from another array. In Fortran this is done by using the `mold` parameter to the `allocate` function, but in FAR++ it is done as a method on an array called `mold`. 
 

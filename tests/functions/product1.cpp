@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main() {
-    std::cout << "Testing product\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing product " << argv[0] << "\n";
     Array<int,1> a = literal(1,2,3,4);
     if (product(a) != 24) {
         std::cerr << "product failed\n";

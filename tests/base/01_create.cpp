@@ -25,9 +25,9 @@ bool test(size_t N=NL){
     return true;
 }
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing create\n";
+    std::cout << "Testing create " << argv[0] << "\n";
 
     Array<int,1> A1(256);
     A1=1;

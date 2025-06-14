@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing rank\n";
+    std::cout << "Testing rank " << argv[0] << "\n";
 
     {
         int a;

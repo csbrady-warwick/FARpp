@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing merge\n";
+    std::cout << "Testing merge " << argv[0] << "\n";
 
     if (merge(0,1,true) != 0) {
         std::cout << "scalar merge test failed\n";

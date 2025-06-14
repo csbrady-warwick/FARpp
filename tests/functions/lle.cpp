@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing lle\n";
+    std::cout << "Testing lle " << argv[0] << "\n";
     if (!lle("Hello","World")){
         std::cout << "Failure, false negative const char*\n";
         return -1;

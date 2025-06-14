@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing dim\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing dim " << argv[0] << "\n";
 	if (softCompare(dim(2.0,1.0),1.0)) {
 		std::cout << "False negative\n";
 		std::cout << "Scalar failure\n";

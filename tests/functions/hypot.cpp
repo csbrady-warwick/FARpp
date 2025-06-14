@@ -7,9 +7,9 @@
 
 using namespace far;
 
-int main() {
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing hypot" << std::endl;
+    std::cout << "Testing hypot " << argv[0] << "\n";
     if (softCompare(hypot(3.0,4.0),5.0)){
         std::cout << "scalar failure\n";
         std::cout << "hypot failure\n";

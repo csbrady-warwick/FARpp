@@ -6,9 +6,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing abs\n";
+	std::cout << "Testing abs " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=-1;
 	B=abs(A);

@@ -1,4 +1,5 @@
-FC=g++
+CC=g++
+OMPFLAG=
 
 # Get all .cpp files in the current directory
 CPP_FILES := $(wildcard *.cpp)
@@ -18,7 +19,8 @@ dirs:
 
 # Rule to build each program
 %: %.cpp
-	$(FC) -O3 -g --std=c++20 -I ../../include -I ../../../include -o bin/$@ $<
+	$(CC) -O3 -g --std=c++20 -I ../../include -I ../../../include $(OMPFLAG) -o bin/$@ $<
+	$(CC) -O3 -g --std=c++20 -DFAR_USE_C_INDEX -I ../../include -I ../../../include $(OMPFLAG) -o bin/$@_co $<
 
 # Clean target to remove all generated programs
 clean:

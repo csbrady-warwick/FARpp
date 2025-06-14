@@ -5,9 +5,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-  std::cout << "Testing spacing\n";
+  std::cout << "Testing spacing " << argv[0] << "\n";
 
 		if (std::numeric_limits<float>::is_iec559) {
       std::cout << "IEEE 754 float support found. Testing true spacing\n";

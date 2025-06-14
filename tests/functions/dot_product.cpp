@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing dot_product\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing dot_product " << argv[0] << "\n";
 	{
 		Array<double,1> A(NX), B(NX);
 		A=linspace(1.0,double(NX),NX);

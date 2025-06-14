@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing out_of_range\n";
+    std::cout << "Testing out_of_range " << argv[0] << "\n";
 
     Array<int,1> A = ones<int>(10);
     if (any(out_of_range(A,1))){

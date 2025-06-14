@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing sqrt\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing sqrt " << argv[0] << "\n";
 
     Array<float,1> a = sqrt(linspace(1.0f,3.0f,3));
     if (any(abs(a-literal(1.0f,1.41421356f,1.73205081f))>1e-6f)){

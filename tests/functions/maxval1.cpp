@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing maxval\n";
+	std::cout << "Testing maxval " << argv[0] << "\n";
 
     Array<int,2> A = reshape(linspace(1,9,9),3,3);
 

@@ -4,7 +4,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
+
+		std::cout << "Testing tiny " << argv[0] << "\n";
 
     if constexpr(std::numeric_limits<double>::is_iec559){
         std::cout << "Testing tiny for IEEE 754 double\n";

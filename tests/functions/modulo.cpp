@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing modulo\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing modulo " << argv[0] << "\n";
 
     if (modulo(5, 3)!=2){
         std::cout << "Error in modulo(5, 3)\n";

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing initialise\n";
+    std::cout << "Testing initialise " << argv[0] << "\n";
 
     Array<int,1> A={1,2,3};
     if (A.getRankSize(1)!=3){
@@ -28,7 +28,7 @@ int main(){
         return -1;
     }
 
-    Array<int,2> B={{1,2,3},{4,5,6}};
+    Array<int,2> B=FortranArray<int,2>({{1,2,3},{4,5,6}});
     if (B.getRankSize(1)!=3 || B.getRankSize(2)!=2){
         std::cout << "Initialise 2D array failed (wrong size)\n";
         return -1;

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing same_type_as\n";
+    std::cout << "Testing same_type_as " << argv[0] << "\n";
     Array<int,1> a(10);
     Array<int,1> b(10);
     Array<int,2> c(10,10);

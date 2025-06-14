@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing atand\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing atand " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=1.0;
 	B=atand(A);

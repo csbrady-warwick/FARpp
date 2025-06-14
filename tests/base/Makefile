@@ -1,4 +1,4 @@
-FC=g++
+CXX=g++
 
 # Get all .cpp files in the current directory
 CPP_FILES := $(wildcard *.cpp)
@@ -25,8 +25,10 @@ dirs:
 
 # Rule to build each program
 %: %.cpp
-	$(FC) -O3 -g -Wall -Wextra --std=c++20 -I ../../include -I ../include -o bin/$@ $<
+	$(CXX) -O3 -g -Wall -Wextra --std=c++20 -I ../../include -I ../include -o bin/$@ $<
+	$(CXX) -O3 -DFAR_USE_C_INDEX -g -Wall -Wextra --std=c++20 -I ../../include -I ../include -o bin/$@_co $<
 	@echo "./bin/"$@ >> run.sh
+	@echo "./bin/"$@_co >> run.sh
 
 # Clean target to remove all generated programs
 clean:

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing minexponent\n";
+    std::cout << "Testing minexponent " << argv[0] << "\n";
     if (minexponent(2.0) != std::numeric_limits<double>::min_exponent) {
         std::cout << "Error double minexponent \n";
         return -1;

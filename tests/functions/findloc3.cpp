@@ -6,10 +6,9 @@
 
 using namespace far;
 
-int main()
-{
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing findloc 3\n";
+	std::cout << "Testing findloc 3 " << argv[0] << "\n";
   Array<int, 2> a(NX, NY);
   Array<int, 1> loc;
 

@@ -4,8 +4,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing transfer\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing transfer " << argv[0] << "\n";
     Array<int,1> A(2);
     Array<uint8_t,1> B(2*sizeof(int));
 

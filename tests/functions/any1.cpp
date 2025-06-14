@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing any with full reduction\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing any with full reduction " << argv[0] << "\n";
   Array<bool,2> A(NX,NY);
 
 	if (!any(true)) {

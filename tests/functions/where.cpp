@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing where and where_elsewhere" << std::endl;
+    std::cout << "Testing where and where_elsewhere " << argv[0] << "\n";
     Array<int,2> A= reshape(linspace(-5,3,9),3,3);
     Array<int,2> B;
     B.mold(A);

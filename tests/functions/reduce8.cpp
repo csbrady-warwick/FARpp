@@ -3,11 +3,11 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing reduce in direction with mask and identity\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing reduce in direction with mask and identity " << argv[0] << "\n";
 
     //Reduction by sum
-    Array<int,2> a = reshape(literal(1,2,3,4,5,6),3,2);
+    Array<int,2> a = reshape(FortranLiteral(1,2,3,4,5,6),3,2);
     auto result = reduce_with_mask_and_identity(a,[](const int &x, const int &y){return x+y;},2,a>3,-1);
 
     if (any(result!=literal(4,5,6))){

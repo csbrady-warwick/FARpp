@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing not\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing not " << argv[0] << "\n";
 
     uint8_t tval = 0b10101010;
     if (f_not(tval) != 0b01010101){

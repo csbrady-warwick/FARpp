@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing bge\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing bge " << argv[0] << "\n";
 #if defined(__cpp_lib_bit_cast) && __cpp_lib_bit_cast >= 201806L
 	Array<int,2> A(NX,NY), B(NX,NY);
 	A=2;B=1;

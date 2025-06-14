@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing maxexponent\n";
+    std::cout << "Testing maxexponent " << argv[0] << "\n";
     if (maxexponent(2.0) != std::numeric_limits<double>::max_exponent) {
         std::cout << "Error double maxexponent \n";
         return -1;

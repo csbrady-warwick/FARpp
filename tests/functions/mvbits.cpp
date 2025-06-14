@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing mvbits\n";
+    std::cout << "Testing mvbits " << argv[0] << "\n";
 
     uint8_t p1 = 0b00000000;
     uint8_t p2 = 0b00111100;

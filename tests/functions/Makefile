@@ -26,7 +26,9 @@ dirs:
 # Rule to build each program
 %: %.cpp
 	$(FC) -O3 -g -Wall -Wextra --std=c++20 -I ../../include -I ../include -o bin/$@ $<
-	@echo "./bin/"$@ >> run.sh
+	$(FC) -O3 -g -Wall -Wextra -DFAR_USE_C_INDEX --std=c++20 -I ../../include -I ../include -o bin/$@_co $<
+	@echo "./bin/"$@'||echo -e "\033[31mERROR\033[0"' >> run.sh
+	@echo "./bin/"$@_co'||echo -e "\033[31mERROR\033[0"' >> run.sh
 
 # Clean target to remove all generated programs
 clean:

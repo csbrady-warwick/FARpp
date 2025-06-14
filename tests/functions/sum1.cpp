@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "1D summation with full reduction\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "1D summation with full reduction " << argv[0] << "\n";
     Array<int,1> a = linspace(1,5,5);
     if (sum(a)!=15){
         std::cout << "Failure 1D summation without rank\n";

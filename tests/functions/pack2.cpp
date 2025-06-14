@@ -6,8 +6,8 @@ using namespace far;
 #define NX 3
 #define NY 4
 
-int main(){
-    std::cout << "Testing pack with vector\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing pack with vector " << argv[0] << "\n";
     Array<int,2> A = reshape(linspace<int>(1,NX*NY,NX*NY),NX,NY);
     Array<bool,2> mask(NX,NY);
     Array<int,1> vector(NX*NY);

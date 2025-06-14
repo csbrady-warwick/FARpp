@@ -6,12 +6,12 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-	std::cout << "Testing len\n";
+	std::cout << "Testing len " << argv[0] << "\n";
 	{
 		char test[10] = "123456789";
-		if (len<int>(test)!=10){
+		if (len<int>(test)!=9){
 			std::cout << "Constant length scalar string failure\n";
 			return -1;
 		}

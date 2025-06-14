@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing reduce with mask\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing reduce with mask " << argv[0] << "\n";
 
     //Reduction by sum
     Array<int,2> a = reshape(literal(1,2,3,4,5,6),3,2);

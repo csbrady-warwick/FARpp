@@ -25,17 +25,14 @@ int main(){
 
 	timer t;
 	t.begin("main loop");
-//	std::cout << "Starting\n";
 	auto allX = Range(1,NX);
 	auto allY = Range(1,NY);
 	auto allZ = Range(1,NZ);
 #pragma omp parallel
 	{
 		for (int its = 0; its<ITS;++its){
-			//std::cout << "Iteration " << its << "\n";
 			beginWorkshare();
 			//Update the temporary
-			//std::cout << "Update\n";
 			data2(allX,allY,allZ) = (
 					data(Range(0,NX-1),allY,allZ) +
 					data(Range(2,NX+1),allY,allZ) +
@@ -45,7 +42,6 @@ int main(){
 					data(allX,allY,Range(2,NZ+1))
 					) / 6.0;
 			//Copy back
-			//std::cout << "Copyback\n";
 			data(allX,allY,allZ)=data2(allX,allY,allZ);
 			endWorkshare();
 #pragma omp barrier

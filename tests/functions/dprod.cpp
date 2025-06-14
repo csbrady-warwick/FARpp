@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing dprod\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing dprod " << argv[0] << "\n";
 	{
 		if (softCompare(dprod(1.2,1.4),1.2*1.4)) {
 			std::cout << "Real failure\n";

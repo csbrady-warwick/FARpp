@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing atanh\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing atanh " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=0.5;
 	B=atanh(A);

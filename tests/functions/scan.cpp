@@ -4,8 +4,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing scan\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing scan " << argv[0] << "\n";
     
     if (scan("Hello","e")!=2){
         std::cout << "Error: scan(\"Hello\",\"e\")!=2\n";

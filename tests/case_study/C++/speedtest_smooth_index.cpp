@@ -24,14 +24,25 @@ int main(){
 #pragma omp parallel
 	{
 		for (int its = 0; its<ITS;++its){
+#ifndef FAR_USE_C_INDEX
 			for (int j=1;j<=NY;++j){
 				#pragma omp for
 				for (int i=1;i<=NX;++i){
 					data2(i,j) = (data(i-1,j) + data(i+1,j) + data(i,j-1) + data(i,j+1)) * 0.25;
 				}
 			}
+#else
+      for (int i=1;i<=NX;++i){
+        #pragma omp for
+        for (int j=1;j<=NY;++j){
+          data2(i,j) = (data(i-1,j) + data(i+1,j) + data(i,j-1) + data(i,j+1)) * 0.25;
+        }
+      }
+#endif
 			//Copy back
+      beginWorkshare();
 			data(Range(1,NX),Range(1,NY))=data2(Range(1,NX),Range(1,NY));
+      endWorkshare();
 #pragma omp barrier
 		}
 	}

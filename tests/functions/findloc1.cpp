@@ -15,10 +15,17 @@ int main()
 
   a=0;
   // Test for finding a single value in the correct location
+#ifndef FAR_USE_C_INDEX
   for (int j = NY; j >= 1; j--)
   {
     for (int i = NX; i >= 1 ; i--)
     {
+#else
+  for (int i = NX; i >= 1; i--)
+  {
+    for (int j = NY; j >= 1 ; j--)
+    {
+#endif
       a(i, j) = 8;
       {
         loc = findloc(a, 8);
@@ -32,10 +39,17 @@ int main()
   }
 
   a=0;
+#ifndef FAR_USE_C_INDEX
   for (int j = 1; j <= NY; j++)
   {
     for (int i = 1; i <= NX; i++)
     {
+#else
+  for (int i = 1; i <= NX; i++)
+  {
+    for (int j = 1; j <= NY; j++)
+    {
+#endif
       a(i, j) = 8;
       {
         loc = findloc(a, 8, true);

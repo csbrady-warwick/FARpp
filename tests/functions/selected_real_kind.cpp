@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test selected_real_kind\n";
+    std::cout << "Test selected_real_kind " << argv[0] << "\n";
 
     if (!std::is_same_v<selected_real_kind<6,37>, float>){
         std::cout << "Error: selected_real_kind<6,37> != float\n";

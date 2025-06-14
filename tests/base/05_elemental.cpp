@@ -13,9 +13,9 @@ decltype(auto) testElementalLazy(T1 &&a, T2 &&b){
 		return makeElemental<l>(a,b);
 }
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing elemental functions\n";
+    std::cout << "Testing elemental functions " << argv[0] << "\n";
 
     if (testElementalLazy(1,1.0)!=2){
         std::cout << "Error in testElementalLazy(1,1.0)\n";

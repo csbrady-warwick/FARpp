@@ -11,8 +11,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing bessel_jn\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing bessel_jn " << argv[0] << "\n";
 #if !defined(FAR_NEED_BOOST_MATHS) || defined(FAR_HAS_BOOST_MATHS)
   Array<double,2> A(NX,NY), B;
 	A=1.0;
@@ -47,6 +47,8 @@ int main(){
 		std::cout << "Second form failure\n";
 		return -1;
 	}
+#else
+  std::cout << "No test possible on this platform\n";
 #endif
 	std::cout << "Tests passed\n\n";
 }

@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing acospi\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing acospi " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=0.0;
 	B=acospi(A);

@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test for ibits\n";
+    std::cout << "Test for ibits " << argv[0] << "\n";
     if (ibits(0b1111,0,2) != 3){
         std::cout << "Scalar failure\n";
         return -1;

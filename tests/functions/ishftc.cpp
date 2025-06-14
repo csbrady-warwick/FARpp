@@ -6,10 +6,10 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
     //Scalar tests without wraparound
-    std::cout << "Testing ishftc\n";
+    std::cout << "Testing ishftc " << argv[0] << "\n";
     if (ishftc(0b00001111,2)!=0b00111100){
         std::cout << "ishftc scalar left shift failure\n";
         return -1;

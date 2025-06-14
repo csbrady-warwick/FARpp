@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing pointers\n";
+    std::cout << "Testing pointers " << argv[0] << "\n";
 
     Array<int,3> A(10,20,30);
     A=1;

@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing ubound\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing ubound " << argv[0] << "\n";
     {
         Array<int,1> a(10);
         #ifdef RANK1_INQUIRY_IS_VALUE

@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing trailz\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing trailz " << argv[0] << "\n";
     Array<uint8_t,1> A(8);
     A(1)=1;
     for (int i=2;i<=8;i++){

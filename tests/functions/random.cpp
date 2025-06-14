@@ -6,8 +6,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing random\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing random " << argv[0] << "\n";
 
     if (random_seed_size() != std::mt19937::state_size) {
         std::cout << random_seed_size() << " != " << FAR_DEFAULT_GLOBAL_RNG::state_size << "\n";

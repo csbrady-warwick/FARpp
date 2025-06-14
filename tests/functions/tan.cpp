@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing tan\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing tan " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=M_PI/4.0;
 	B=tan(A);

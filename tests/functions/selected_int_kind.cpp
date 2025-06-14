@@ -6,8 +6,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing selected_int_kind\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing selected_int_kind " << argv[0] << "\n";
     if constexpr(!std::is_same_v<selected_int_kind<1>,int8_t>){
         std::cout << "Error: selected_int_kind<1>!=int8_t\n";
         return -1;

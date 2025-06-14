@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Test for ieor\n";
+    std::cout << "Test for ieor " << argv[0] << "\n";
     if (ieor(0b01,0b10) != 3){
         std::cout << "Scalar failure (no common bits)\n";
         return -1;

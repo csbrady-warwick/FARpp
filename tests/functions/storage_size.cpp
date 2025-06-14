@@ -8,8 +8,8 @@ struct demo{
     char c[3];
 };
 
-int main(){
-    std::cout << "Testing storage_size\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing storage_size " << argv[0] << "\n";
     int i;
     if (storage_size(i)!=sizeof(int)*CHAR_BIT){
         std::cout << "Error: storage_size(int) != sizeof(int)\n";

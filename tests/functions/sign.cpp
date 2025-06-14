@@ -3,9 +3,9 @@
 
 using namespace far;
 
-int main(){
+int main([[maybe_unused]]int argc, char** argv){
 
-    std::cout << "Testing sign\n";
+    std::cout << "Testing sign " << argv[0] << "\n";
     if (sign(1,1) != 1) {
         std::cout << "Positive integer failed\n";
         return -1;

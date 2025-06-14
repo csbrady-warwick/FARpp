@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing erf\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing erf " << argv[0] << "\n";
 	Array<double,2> A(NX,NY), B;
 	A=1.2345;
 	B=erf(A);

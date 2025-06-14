@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing atan2d\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing atan2d " << argv[0] << "\n";
 	Array<double,2> A(NX,NY), B(NX,NY), C;
 	A=1.0;
 	B=2.0;

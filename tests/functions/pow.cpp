@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main() {
-    std::cout << "Testing pow\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing pow " << argv[0] << "\n";
     Array<int,1> a = literal(1,2,3,4);
     if (any(pow(a, 2) != literal(1, 4, 9, 16))) {
         std::cerr << "Integer power failed\n";

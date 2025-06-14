@@ -7,8 +7,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing sin\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing sin " << argv[0] << "\n";
   Array<double,2> A(NX,NY), B;
 	A=M_PI/2.0;
 	B=sin(A);

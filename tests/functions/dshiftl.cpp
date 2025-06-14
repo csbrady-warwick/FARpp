@@ -8,8 +8,8 @@
 
 using namespace far;
 
-int main(){
-	std::cout << "Testing dshiftl\n";
+int main([[maybe_unused]]int argc, char** argv){
+	std::cout << "Testing dshiftl " << argv[0] << "\n";
 	{
 		int64_t A = 56, B = 117;
 		int64_t v = dshiftl(A,B,3);

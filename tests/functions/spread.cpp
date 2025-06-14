@@ -3,8 +3,8 @@
 
 using namespace far;
 
-int main(){
-    std::cout << "Testing spread\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing spread " << argv[0] << "\n";
 
     Array<int,1> a=linspace(1,3,3);
     Array<int,2> b = spread(a,1,4);

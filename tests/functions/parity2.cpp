@@ -6,8 +6,8 @@ using namespace far;
 #define NX 3
 #define NY 3
 
-int main(){
-    std::cout << "Testing parity function\n";
+int main([[maybe_unused]]int argc, char** argv){
+    std::cout << "Testing parity function " << argv[0] << "\n";
 
     Array<bool,2> A(NX,NY);
     A=true;
